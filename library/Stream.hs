@@ -50,6 +50,14 @@ instance Monad m => MonadPlus (Stream m) where
   mzero = inline mempty
   mplus = inline mappend
 
+instance MonadTrans Stream where
+  lift =
+    Stream . liftM (\a -> Just (a, mempty))
+
+instance MonadIO m => MonadIO (Stream m) where
+  liftIO =
+    lift . liftIO
+
 
 -- * Execution in the base monad
 -------------------------
