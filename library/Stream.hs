@@ -126,8 +126,6 @@ take :: Monad m => Int -> Stream m a -> Stream m a
 take =
   \case
     n | n > 0 ->
-      \s ->
-        Stream $
-          (liftM . fmap) (\(h, t) -> (h, take (pred n) t)) (uncons s)
+      Stream . (liftM . fmap) (\(h, t) -> (h, take (pred n) t)) . uncons
     _ ->
       mempty
