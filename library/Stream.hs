@@ -99,12 +99,7 @@ traverse_ f =
 -- Construct from a list.
 fromList :: Monad m => [a] -> Stream m a
 fromList = 
-  unfold unconsList
-  where
-    unconsList =
-      \case
-        h : t -> Just (h, t)
-        [] -> Nothing
+  foldr cons mempty
 
 -- |
 -- Construct by unfolding a pure data structure.
