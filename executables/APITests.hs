@@ -22,12 +22,12 @@ test_monadLaw1 =
 test_monadLaw2 =
   assertBool =<< streamsEqual (m >>= return) m
   where
-    m = S.fromList ['a'..'z']
+    m = S.fromFoldable ['a'..'z']
 
 test_monadLaw3 =
   assertBool =<< streamsEqual (m >>= (\x -> k x >>= h)) ((m >>= k) >>= h)
   where
-    m = S.fromList ['a'..'z']
+    m = S.fromFoldable ['a'..'z']
     k a = return $ ord a
     h a = return $ a + 1
 
@@ -35,19 +35,19 @@ test_monadLaw4 =
   assertBool =<< streamsEqual (fmap f xs) (xs >>= return . f)
   where
     f = ord
-    xs = S.fromList ['a'..'z']
+    xs = S.fromFoldable ['a'..'z']
 
 test_mappend =
   assertBool =<< 
     streamsEqual 
-      (S.fromList [0..7]) 
-      (S.fromList [0..3] <> S.fromList [4..7])
+      (S.fromFoldable [0..7]) 
+      (S.fromFoldable [0..3] <> S.fromFoldable [4..7])
 
 test_mappendAndTake =
   assertBool =<< 
     streamsEqual 
-      (S.fromList [0..5]) 
-      (S.take 6 $ S.fromList [0..3] <> S.fromList [4..7])
+      (S.fromFoldable [0..5]) 
+      (S.take 6 $ S.fromFoldable [0..3] <> S.fromFoldable [4..7])
 
 test_traverseDoesntCauseTraversal =
   do
@@ -58,7 +58,7 @@ test_traverseDoesntCauseTraversal =
     stream1 =
       do
         ref <- lift $ ask
-        x <- S.fromList ['a'..'z']
+        x <- S.fromFoldable ['a'..'z']
         liftIO $ modifyIORef ref (+1)
         return x
     stream2 =
@@ -75,7 +75,7 @@ test_mappendDoesntCauseTraversal =
     stream =
       do
         ref <- lift $ ask
-        x <- S.fromList [0..4]
+        x <- S.fromFoldable [0..4]
         liftIO $ modifyIORef ref (+1)
         return x
 
@@ -88,7 +88,7 @@ test_takeDoesntCauseTraversal =
     stream =
       do
         ref <- lift $ ask
-        x <- S.fromList [0..10]
+        x <- S.fromFoldable [0..10]
         liftIO $ modifyIORef ref (+1)
         return x
 

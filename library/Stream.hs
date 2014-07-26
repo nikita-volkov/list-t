@@ -103,10 +103,10 @@ traverse_ f =
 -------------------------
 
 -- |
--- Construct from a list.
-{-# INLINABLE fromList #-}
-fromList :: Monad m => [a] -> Stream m a
-fromList = 
+-- Construct from any foldable.
+{-# INLINABLE fromFoldable #-}
+fromFoldable :: (Monad m, Foldable f) => f a -> Stream m a
+fromFoldable = 
   foldr cons mempty
 
 -- |
