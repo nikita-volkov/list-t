@@ -73,9 +73,9 @@ head =
   liftM (fmap fst) . uncons
 
 {-# INLINABLE tail #-}
-tail :: Monad m => Stream m a -> m (Stream m a)
+tail :: Monad m => Stream m a -> m (Maybe (Stream m a))
 tail =
-  liftM (maybe mempty snd) . uncons
+  liftM (fmap snd) . uncons
 
 {-# INLINABLE null #-}
 null :: Monad m => Stream m a -> m Bool
