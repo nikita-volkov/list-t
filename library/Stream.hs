@@ -88,6 +88,9 @@ toList :: Monad m => Stream m a -> m [a]
 toList =
   liftM ($ []) . fold (\f e -> return $ f . (e :)) id
 
+traverse_ :: Monad m => (a -> m ()) -> Stream m a -> m ()
+traverse_ f =
+  fold (const f) ()
 
 -- * Construction
 -------------------------
