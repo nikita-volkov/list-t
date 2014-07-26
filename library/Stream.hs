@@ -62,32 +62,39 @@ instance MonadIO m => MonadIO (Stream m) where
 -- * Execution in the base monad
 -------------------------
 
+{-# INLINABLE uncons #-}
 uncons :: Stream m a -> m (Maybe (a, Stream m a))
 uncons (Stream m) = 
   m
 
+{-# INLINABLE head #-}
 head :: Monad m => Stream m a -> m (Maybe a)
 head =
   liftM (fmap fst) . uncons
 
+{-# INLINABLE tail #-}
 tail :: Monad m => Stream m a -> m (Stream m a)
 tail =
   liftM (maybe mempty snd) . uncons
 
+{-# INLINABLE null #-}
 null :: Monad m => Stream m a -> m Bool
 null =
   liftM (maybe True (const False)) . uncons
 
+{-# INLINABLE fold #-}
 fold :: Monad m => (r -> a -> m r) -> r -> Stream m a -> m r
 fold s r = 
   uncons >=> maybe (return r) (\(h, t) -> s r h >>= \r' -> fold s r' t)
 
 -- |
 -- Convert to a list.
+{-# INLINABLE toList #-}
 toList :: Monad m => Stream m a -> m [a]
 toList =
   liftM ($ []) . fold (\f e -> return $ f . (e :)) id
 
+{-# INLINABLE traverse_ #-}
 traverse_ :: Monad m => (a -> m ()) -> Stream m a -> m ()
 traverse_ f =
   fold (const f) ()
@@ -97,12 +104,14 @@ traverse_ f =
 
 -- |
 -- Construct from a list.
+{-# INLINABLE fromList #-}
 fromList :: Monad m => [a] -> Stream m a
 fromList = 
   foldr cons mempty
 
 -- |
 -- Construct by unfolding a pure data structure.
+{-# INLINABLE unfold #-}
 unfold :: Monad m => (b -> Maybe (a, b)) -> b -> Stream m a
 unfold f s =
   maybe mempty (\(h, t) -> cons h (unfold f t)) (f s)
@@ -111,15 +120,18 @@ unfold f s =
 -- * Transformation
 -------------------------
 
+{-# INLINABLE cons #-}
 cons :: Monad m => a -> Stream m a -> Stream m a
 cons h t =
   Stream $ return (Just (h, t))
 
+{-# INLINABLE traverse #-}
 traverse :: Monad m => (a -> m b) -> Stream m a -> Stream m b
 traverse f s =
   Stream $ 
     uncons s >>= mapM (\(h, t) -> f h >>= \h' -> return (h', traverse f t))
 
+{-# INLINABLE take #-}
 take :: Monad m => Int -> Stream m a -> Stream m a
 take =
   \case
