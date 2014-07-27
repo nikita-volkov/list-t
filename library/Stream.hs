@@ -62,6 +62,10 @@ instance MonadIO m => MonadIO (Stream m) where
   liftIO =
     lift . liftIO
 
+instance MFunctor Stream where
+  hoist f (Stream m) =
+    Stream $ f $ m >>= return . fmap (\(h, t) -> (h, hoist f t))
+
 
 -- * Execution in the base monad
 -------------------------

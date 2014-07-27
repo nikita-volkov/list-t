@@ -44,6 +44,7 @@ library
     loch-th == 0.2.*,
     placeholders == 0.1.*,
     -- general:
+    mmorph == 1.0.*,
     transformers == 0.4.*,
     base-prelude == 0.1.*
   default-extensions:
