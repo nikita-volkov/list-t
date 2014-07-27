@@ -31,8 +31,10 @@ instance (Monad m, Functor m) => Applicative (Stream m) where
     ap
 
 instance (Monad m, Functor m) => Alternative (Stream m) where
-  empty = inline mzero
-  (<|>) = inline mplus
+  empty = 
+    inline mzero
+  (<|>) = 
+    inline mplus
 
 instance Monad m => Monad (Stream m) where
   return a =
@@ -47,8 +49,10 @@ instance Monad m => Monad (Stream m) where
             uncons $ k2 h1 <> (t1 >>= k2)
 
 instance Monad m => MonadPlus (Stream m) where
-  mzero = inline mempty
-  mplus = inline mappend
+  mzero = 
+    inline mempty
+  mplus = 
+    inline mappend
 
 instance MonadTrans Stream where
   lift =
