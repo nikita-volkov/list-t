@@ -87,6 +87,10 @@ test_mappendDoesntCauseTraversal =
 -- * Other
 -------------------------
 
+test_repeat =
+  assertEqual [2,2,2] =<< do
+    L.toList $ L.take 3 $ L.repeat (2 :: Int)
+
 test_traverseDoesntCauseTraversal =
   do
     ref <- newIORef 0

@@ -1,6 +1,6 @@
 module ListT where
 
-import ListT.Prelude hiding (toList, yield, fold, traverse, head, tail, take)
+import ListT.Prelude hiding (toList, yield, fold, traverse, head, tail, take, repeat)
 
 
 newtype ListT m a =
@@ -124,6 +124,11 @@ unfold :: Monad m => (b -> Maybe (a, b)) -> b -> ListT m a
 unfold f s =
   maybe mempty (\(h, t) -> cons h (unfold f t)) (f s)
 
+-- |
+-- Produce an infinite stream.
+{-# INLINABLE repeat #-}
+repeat :: Monad m => a -> ListT m a
+repeat = fix . cons
 
 -- * Transformation
 -------------------------
