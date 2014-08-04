@@ -35,6 +35,6 @@ import qualified Debug.Trace.LocationTH
 
 bug = [e| $(Debug.Trace.LocationTH.failure) . (msg <>) |]
   where
-    msg = "A \"stream\" package bug: " :: String
+    msg = "A \"list-t\" package bug: " :: String
 
 bottom = [e| $bug "Bottom evaluated" |]
