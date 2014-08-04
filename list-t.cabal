@@ -3,8 +3,13 @@ name:
 version:
   0.1.0
 synopsis:
+  ListT done right
 description:
+  A correct implementation of the list monad-transformer.
+  Useful for streaming of mutable datastructures.
+  E.g., see <http://hackage.haskell.org/package/stm-containers "stm-containers">.
 category:
+  Data Structures, Control, Monad, Data
 homepage:
   https://github.com/nikita-volkov/list-t 
 bug-reports:
