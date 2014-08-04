@@ -1,8 +1,36 @@
-module ListT where
+module ListT
+(
+  ListT,
+  -- * Classes
+  ListTrans(..),
+  ListMonad(..),
+  -- * Execution utilities
+  head,
+  tail,
+  null,
+  fold,
+  toList,
+  traverse_,
+  -- * Construction utilities
+  fromFoldable,
+  unfold,
+  repeat,
+  -- * Transformation utilities
+  traverse,
+  take,
+)
+where
 
-import ListT.Prelude hiding (toList, yield, fold, traverse, head, tail, take, repeat)
+import BasePrelude hiding (toList, yield, fold, traverse, head, tail, take, repeat, null, traverse_)
+import Control.Monad.Morph
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Reader
 
 
+-- |
+-- A proper implementation of a list monad-transformer.
+-- Useful for streaming of monadic data structures.
 newtype ListT m a =
   ListT (m (Maybe (a, ListT m a)))
 
@@ -66,55 +94,86 @@ instance MFunctor ListT where
     ListT $ f $ m >>= return . fmap (\(h, t) -> (h, hoist f t))
 
 
--- * Class
+-- * Classes
 -------------------------
 
-class MonadTrans t => MonadListTrans t where
+-- |
+-- A monad transformer capable of executing like a list.
+class MonadTrans t => ListTrans t where
+  -- |
+  -- Execute in the inner monad,
+  -- getting the head and a tail.
+  -- Returns nothing if it's empty.
   uncons :: t m a -> m (Maybe (a, t m a))
-  cons :: Monad m => a -> t m a -> t m a
 
-instance MonadListTrans ListT where
+instance ListTrans ListT where
   {-# INLINE uncons #-}
-  uncons (ListT m) = 
-    m
-  cons h t = 
-    ListT $ return (Just (h, t))
+  uncons (ListT m) = m
 
 
--- * Execution in the base monad
+-- |
+-- A monad capable of constructing like a list.
+class MonadPlus m => ListMonad m where
+  -- |
+  -- Prepend an element.
+  cons :: a -> m a -> m a
+
+instance ListMonad [] where
+  cons a m = a : m
+
+instance Monad m => ListMonad (ListT m) where
+  {-# INLINABLE cons #-}
+  cons h t = ListT $ return (Just (h, t))
+
+instance ListMonad m => ListMonad (ReaderT e m) where
+  cons a m = ReaderT $ cons a . runReaderT m
+
+
+-- * Execution in the inner monad
 -------------------------
 
+-- |
+-- Execute, getting the head. Returns nothing if it's empty.
 {-# INLINABLE head #-}
-head :: (Monad m, MonadListTrans t) => t m a -> m (Maybe a)
+head :: (Monad m, ListTrans t) => t m a -> m (Maybe a)
 head =
   liftM (fmap fst) . uncons
 
+-- |
+-- Execute, getting the tail. Returns nothing if it's empty.
 {-# INLINABLE tail #-}
-tail :: (Monad m, MonadListTrans t) => t m a -> m (Maybe (t m a))
+tail :: (Monad m, ListTrans t) => t m a -> m (Maybe (t m a))
 tail =
   liftM (fmap snd) . uncons
 
+-- |
+-- Execute, checking whether it's empty.
 {-# INLINABLE null #-}
-null :: (Monad m, MonadListTrans t) => t m a -> m Bool
+null :: (Monad m, ListTrans t) => t m a -> m Bool
 null =
   liftM (maybe True (const False)) . uncons
 
+-- |
+-- Execute, applying a left fold.
 {-# INLINABLE fold #-}
-fold :: (Monad m, MonadListTrans t) => (r -> a -> m r) -> r -> t m a -> m r
+fold :: (Monad m, ListTrans t) => (r -> a -> m r) -> r -> t m a -> m r
 fold s r = 
   uncons >=> maybe (return r) (\(h, t) -> s r h >>= \r' -> fold s r' t)
 
 -- |
--- Convert to a list.
+-- Execute, folding to a list.
 {-# INLINABLE toList #-}
-toList :: (Monad m, MonadListTrans t) => t m a -> m [a]
+toList :: (Monad m, ListTrans t) => t m a -> m [a]
 toList =
   liftM ($ []) . fold (\f e -> return $ f . (e :)) id
 
+-- |
+-- Execute, traversing the stream with a side effect in the inner monad. 
 {-# INLINABLE traverse_ #-}
-traverse_ :: (Monad m, MonadListTrans t) => (a -> m ()) -> t m a -> m ()
+traverse_ :: (Monad m, ListTrans t) => (a -> m ()) -> t m a -> m ()
 traverse_ f =
   fold (const f) ()
+
 
 -- * Construction
 -------------------------
@@ -122,35 +181,43 @@ traverse_ f =
 -- |
 -- Construct from any foldable.
 {-# INLINABLE fromFoldable #-}
-fromFoldable :: (Monad m, Foldable f, MonadListTrans t, MonadPlus (t m)) => f a -> t m a
+fromFoldable :: (ListMonad m, Foldable f) => f a -> m a
 fromFoldable = 
   foldr cons mzero
 
 -- |
 -- Construct by unfolding a pure data structure.
 {-# INLINABLE unfold #-}
-unfold :: (Monad m, MonadListTrans t, MonadPlus (t m)) => (b -> Maybe (a, b)) -> b -> t m a
+unfold :: (ListMonad m) => (b -> Maybe (a, b)) -> b -> m a
 unfold f s =
   maybe mzero (\(h, t) -> cons h (unfold f t)) (f s)
 
 -- |
 -- Produce an infinite stream.
 {-# INLINABLE repeat #-}
-repeat :: (Monad m, MonadListTrans t) => a -> t m a
-repeat = fix . cons
+repeat :: (ListMonad m) => a -> m a
+repeat = 
+  fix . cons
+
 
 -- * Transformation
 -------------------------
 
+-- |
+-- A lazy transformation,
+-- which traverses the stream in the base monad.
 {-# INLINABLE traverse #-}
-traverse :: (Monad m, MonadListTrans t, MonadPlus (t m)) => (a -> m b) -> t m a -> t m b
+traverse :: (Monad m, ListMonad (t m), ListTrans t) => (a -> m b) -> t m a -> t m b
 traverse f s =
   lift (uncons s) >>= 
   mapM (\(h, t) -> lift (f h) >>= \h' -> cons h' (traverse f t)) >>=
   maybe mzero return
 
+-- |
+-- A lazy trasformation, 
+-- reproducing the behaviour of @Data.List.'Data.List.take'@.
 {-# INLINABLE take #-}
-take :: (Monad m, MonadListTrans t, MonadPlus (t m)) => Int -> t m a -> t m a
+take :: (Monad m, ListMonad (t m), ListTrans t) => Int -> t m a -> t m a
 take =
   \case
     n | n > 0 -> \t ->
