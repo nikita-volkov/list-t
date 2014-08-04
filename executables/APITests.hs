@@ -1,17 +1,34 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
 
 import BasePrelude
+import MTLPrelude
 import Test.Framework
 import Development.Placeholders
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.State
-import Control.Monad.Trans.Reader
 import qualified ListT as L
 
 
 main = htfMain $ htf_thisModulesTests
 
+
+-- * Applicative
+-------------------------
+
+prop_applicativeIdentityLaw (l :: [Int]) =
+  runIdentity $ streamsEqual (pure id <*> s) s
+  where
+    s = L.fromFoldable l
+
+prop_applicativeBehavesLikeList =
+  \(ns :: [Int]) ->
+    let a = fs <*> ns
+        b = runIdentity (L.toList $ L.fromFoldable fs <*> L.fromFoldable ns)
+        in a == b
+  where
+    fs = [(+1), (+3), (+5)]
+
+
+-- * Monad
+-------------------------
 
 test_monadLaw1 =
   assertBool =<< streamsEqual (return a >>= k) (k a)
@@ -37,6 +54,10 @@ test_monadLaw4 =
     f = ord
     xs = L.fromFoldable ['a'..'z']
 
+
+-- * Monoid
+-------------------------
+
 test_mappend =
   assertBool =<< 
     streamsEqual 
@@ -48,6 +69,23 @@ test_mappendAndTake =
     streamsEqual 
       (L.fromFoldable [0..5]) 
       (L.take 6 $ L.fromFoldable [0..3] <> L.fromFoldable [4..7])
+
+test_mappendDoesntCauseTraversal =
+  do
+    ref <- newIORef 0
+    (flip runReaderT) ref (L.toList $ L.take 5 $ stream <> stream)
+    assertEqual 5 =<< readIORef ref
+  where
+    stream =
+      do
+        ref <- lift $ ask
+        x <- L.fromFoldable [0..4]
+        liftIO $ modifyIORef ref (+1)
+        return x
+
+
+-- * Other
+-------------------------
 
 test_traverseDoesntCauseTraversal =
   do
@@ -65,19 +103,6 @@ test_traverseDoesntCauseTraversal =
       L.traverse (return . toUpper) stream1
     stream3 =
       L.take 3 stream2
-
-test_mappendDoesntCauseTraversal =
-  do
-    ref <- newIORef 0
-    (flip runReaderT) ref (L.toList $ L.take 5 $ stream <> stream)
-    assertEqual 5 =<< readIORef ref
-  where
-    stream =
-      do
-        ref <- lift $ ask
-        x <- L.fromFoldable [0..4]
-        liftIO $ modifyIORef ref (+1)
-        return x
 
 test_takeDoesntCauseTraversal =
   do
