@@ -7,7 +7,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans.Reader
-import qualified Stream as S
+import qualified ListT as L
 
 
 main = htfMain $ htf_thisModulesTests
@@ -22,12 +22,12 @@ test_monadLaw1 =
 test_monadLaw2 =
   assertBool =<< streamsEqual (m >>= return) m
   where
-    m = S.fromFoldable ['a'..'z']
+    m = L.fromFoldable ['a'..'z']
 
 test_monadLaw3 =
   assertBool =<< streamsEqual (m >>= (\x -> k x >>= h)) ((m >>= k) >>= h)
   where
-    m = S.fromFoldable ['a'..'z']
+    m = L.fromFoldable ['a'..'z']
     k a = return $ ord a
     h a = return $ a + 1
 
@@ -35,64 +35,64 @@ test_monadLaw4 =
   assertBool =<< streamsEqual (fmap f xs) (xs >>= return . f)
   where
     f = ord
-    xs = S.fromFoldable ['a'..'z']
+    xs = L.fromFoldable ['a'..'z']
 
 test_mappend =
   assertBool =<< 
     streamsEqual 
-      (S.fromFoldable [0..7]) 
-      (S.fromFoldable [0..3] <> S.fromFoldable [4..7])
+      (L.fromFoldable [0..7]) 
+      (L.fromFoldable [0..3] <> L.fromFoldable [4..7])
 
 test_mappendAndTake =
   assertBool =<< 
     streamsEqual 
-      (S.fromFoldable [0..5]) 
-      (S.take 6 $ S.fromFoldable [0..3] <> S.fromFoldable [4..7])
+      (L.fromFoldable [0..5]) 
+      (L.take 6 $ L.fromFoldable [0..3] <> L.fromFoldable [4..7])
 
 test_traverseDoesntCauseTraversal =
   do
     ref <- newIORef 0
-    (flip runReaderT) ref (S.toList stream3)
+    (flip runReaderT) ref (L.toList stream3)
     assertEqual 3 =<< readIORef ref
   where
     stream1 =
       do
         ref <- lift $ ask
-        x <- S.fromFoldable ['a'..'z']
+        x <- L.fromFoldable ['a'..'z']
         liftIO $ modifyIORef ref (+1)
         return x
     stream2 =
-      S.traverse (return . toUpper) stream1
+      L.traverse (return . toUpper) stream1
     stream3 =
-      S.take 3 stream2
+      L.take 3 stream2
 
 test_mappendDoesntCauseTraversal =
   do
     ref <- newIORef 0
-    (flip runReaderT) ref (S.toList $ S.take 5 $ stream <> stream)
+    (flip runReaderT) ref (L.toList $ L.take 5 $ stream <> stream)
     assertEqual 5 =<< readIORef ref
   where
     stream =
       do
         ref <- lift $ ask
-        x <- S.fromFoldable [0..4]
+        x <- L.fromFoldable [0..4]
         liftIO $ modifyIORef ref (+1)
         return x
 
 test_takeDoesntCauseTraversal =
   do
     ref <- newIORef 0
-    (flip runReaderT) ref (S.toList $ S.take 3 $ S.take 7 $ stream)
+    (flip runReaderT) ref (L.toList $ L.take 3 $ L.take 7 $ stream)
     assertEqual 3 =<< readIORef ref
   where
     stream =
       do
         ref <- lift $ ask
-        x <- S.fromFoldable [0..10]
+        x <- L.fromFoldable [0..10]
         liftIO $ modifyIORef ref (+1)
         return x
 
 
-streamsEqual :: (Applicative m, Monad m, Eq a) => S.Stream m a -> S.Stream m a -> m Bool
+streamsEqual :: (Applicative m, Monad m, Eq a) => L.ListT m a -> L.ListT m a -> m Bool
 streamsEqual a b =
-  (==) <$> S.toList a <*> S.toList b
+  (==) <$> L.toList a <*> L.toList b

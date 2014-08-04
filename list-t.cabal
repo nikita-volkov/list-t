@@ -1,14 +1,14 @@
 name:
-  stream
+  list-t
 version:
   0.1.0
 synopsis:
 description:
 category:
 homepage:
-  https://github.com/nikita-volkov/stream 
+  https://github.com/nikita-volkov/list-t 
 bug-reports:
-  https://github.com/nikita-volkov/stream/issues 
+  https://github.com/nikita-volkov/list-t/issues 
 author:
   Nikita Volkov <nikita.y.volkov@mail.ru>
 maintainer:
@@ -29,16 +29,16 @@ source-repository head
   type:
     git
   location:
-    git://github.com/nikita-volkov/stream.git
+    git://github.com/nikita-volkov/list-t.git
 
 
 library
   hs-source-dirs:
     library
   other-modules:
-    Stream.Prelude
+    ListT.Prelude
   exposed-modules:
-    Stream
+    ListT
   build-depends:
     -- debugging:
     loch-th == 0.2.*,
@@ -61,7 +61,7 @@ test-suite api-tests
   main-is:
     APITests.hs
   build-depends:
-    stream,
+    list-t,
     HTF == 0.11.*,
     transformers == 0.4.*,
     placeholders == 0.1.*,

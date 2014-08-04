@@ -1,4 +1,4 @@
-module Stream.Prelude
+module ListT.Prelude
 ( 
   module Exports,
   bug,
