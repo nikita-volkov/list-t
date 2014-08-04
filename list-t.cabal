@@ -1,7 +1,7 @@
 name:
   list-t
 version:
-  0.2.0
+  0.2.1
 synopsis:
   ListT done right
 description:
@@ -45,6 +45,8 @@ library
     ListT
   build-depends:
     mmorph == 1.0.*,
+    monad-control == 0.3.*,
+    transformers-base == 0.4.*,
     transformers == 0.4.*,
     base-prelude == 0.1.*
   default-extensions:

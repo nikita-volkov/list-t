@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module ListT
 (
   ListT,
@@ -26,7 +27,8 @@ import Control.Monad.Morph
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader
-
+import Control.Monad.Trans.Control
+import Control.Monad.Base
 
 -- |
 -- A proper implementation of a list monad-transformer.
@@ -92,6 +94,21 @@ instance MonadIO m => MonadIO (ListT m) where
 instance MFunctor ListT where
   hoist f (ListT m) =
     ListT $ f $ m >>= return . fmap (\(h, t) -> (h, hoist f t))
+
+instance MonadBase b m => MonadBase b (ListT m) where
+  liftBase =
+    lift . liftBase
+
+instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
+  newtype StM (ListT m) a =
+    StM (StM m (Maybe (a, ListT m a)))
+  liftBaseWith runToBase =
+    lift $ liftBaseWith $ \runInner -> 
+      runToBase $ liftM StM . runInner . uncons
+  restoreM (StM inner) =
+    lift (restoreM inner) >>= \case
+      Nothing -> mzero
+      Just (h, t) -> cons h t
 
 
 -- * Classes
