@@ -1,9 +1,8 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
 
-import BasePrelude
+import BasePrelude hiding (toList)
 import MTLPrelude
 import Test.Framework
-import Development.Placeholders
 import qualified ListT as L
 
 
@@ -21,7 +20,7 @@ prop_applicativeIdentityLaw (l :: [Int]) =
 prop_applicativeBehavesLikeList =
   \(ns :: [Int]) ->
     let a = fs <*> ns
-        b = runIdentity (L.toList $ L.fromFoldable fs <*> L.fromFoldable ns)
+        b = runIdentity (toList $ L.fromFoldable fs <*> L.fromFoldable ns)
         in a == b
   where
     fs = [(+1), (+3), (+5)]
@@ -73,7 +72,7 @@ test_mappendAndTake =
 test_mappendDoesntCauseTraversal =
   do
     ref <- newIORef 0
-    (flip runReaderT) ref (L.toList $ L.take 5 $ stream <> stream)
+    (flip runReaderT) ref (toList $ L.take 5 $ stream <> stream)
     assertEqual 5 =<< readIORef ref
   where
     stream =
@@ -89,12 +88,12 @@ test_mappendDoesntCauseTraversal =
 
 test_repeat =
   assertEqual [2,2,2] =<< do
-    L.toList $ L.take 3 $ L.repeat (2 :: Int)
+    toList $ L.take 3 $ L.repeat (2 :: Int)
 
 test_traverseDoesntCauseTraversal =
   do
     ref <- newIORef 0
-    (flip runReaderT) ref (L.toList stream3)
+    (flip runReaderT) ref (toList stream3)
     assertEqual 3 =<< readIORef ref
   where
     stream1 =
@@ -111,7 +110,7 @@ test_traverseDoesntCauseTraversal =
 test_takeDoesntCauseTraversal =
   do
     ref <- newIORef 0
-    (flip runReaderT) ref (L.toList $ L.take 3 $ L.take 7 $ stream)
+    (flip runReaderT) ref (toList $ L.take 3 $ L.take 7 $ stream)
     assertEqual 3 =<< readIORef ref
   where
     stream =
@@ -121,6 +120,9 @@ test_takeDoesntCauseTraversal =
         liftIO $ modifyIORef ref (+1)
         return x
 
+
+toList :: Monad m => L.ListT m a -> m [a]
+toList = L.toList
 
 streamsEqual :: (Applicative m, Monad m, Eq a) => L.ListT m a -> L.ListT m a -> m Bool
 streamsEqual a b =
