@@ -7,7 +7,6 @@ synopsis:
 description:
   A correct implementation of the list monad-transformer.
   Useful for streaming of mutable datastructures.
-  E.g., see <http://hackage.haskell.org/package/stm-containers "stm-containers">.
 category:
   Data Structures, Control, Monad, Data
 homepage:
