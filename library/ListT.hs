@@ -17,6 +17,11 @@ module ListT
   unfold,
   repeat,
   -- * Transformation utilities
+  -- | 
+  -- These utilities only accumulate the transformations
+  -- without actually traversing the stream.
+  -- They only get applied with a single traversal, 
+  -- which happens at the execution.
   traverse,
   take,
 )
@@ -33,6 +38,11 @@ import Control.Monad.Base
 -- |
 -- A proper implementation of a list monad-transformer.
 -- Useful for streaming of monadic data structures.
+-- 
+-- Since it has instances of 'MonadPlus' and 'Alternative',
+-- you can use general utilities packages like
+-- <http://hackage.haskell.org/package/monadplus "monadplus">
+-- with it.
 newtype ListT m a =
   ListT (m (Maybe (a, ListT m a)))
 
@@ -119,7 +129,7 @@ instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
 class MonadTrans t => ListTrans t where
   -- |
   -- Execute in the inner monad,
-  -- getting the head and a tail.
+  -- getting the head and the tail.
   -- Returns nothing if it's empty.
   uncons :: t m a -> m (Maybe (a, t m a))
 
@@ -222,7 +232,7 @@ repeat =
 
 -- |
 -- A lazy transformation,
--- which traverses the stream in the base monad.
+-- which traverses the stream with an action in the inner monad.
 {-# INLINABLE traverse #-}
 traverse :: (Monad m, ListMonad (t m), ListTrans t) => (a -> m b) -> t m a -> t m b
 traverse f s =
