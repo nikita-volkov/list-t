@@ -231,7 +231,7 @@ repeat =
 -------------------------
 
 -- |
--- A lazy transformation,
+-- A transformation,
 -- which traverses the stream with an action in the inner monad.
 {-# INLINABLE traverse #-}
 traverse :: (Monad m, ListMonad (t m), ListTrans t) => (a -> m b) -> t m a -> t m b
@@ -241,7 +241,7 @@ traverse f s =
   maybe mzero return
 
 -- |
--- A lazy trasformation, 
+-- A trasformation, 
 -- reproducing the behaviour of @Data.List.'Data.List.take'@.
 {-# INLINABLE take #-}
 take :: (Monad m, ListMonad (t m), ListTrans t) => Int -> t m a -> t m a
