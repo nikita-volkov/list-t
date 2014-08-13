@@ -120,6 +120,10 @@ test_takeDoesntCauseTraversal =
         liftIO $ modifyIORef ref (+1)
         return x
 
+test_drop =
+  assertEqual [3, 4] =<< do
+    toList $ L.drop 2 $ L.fromFoldable [1 .. 4]
+    
 
 toList :: Monad m => L.ListT m a -> m [a]
 toList = L.toList

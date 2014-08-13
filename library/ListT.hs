@@ -24,10 +24,11 @@ module ListT
   -- which happens at the execution.
   traverse,
   take,
+  drop,
 )
 where
 
-import BasePrelude hiding (toList, yield, fold, traverse, head, tail, take, repeat, null, traverse_)
+import BasePrelude hiding (toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_)
 import Control.Monad.Morph
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -254,3 +255,18 @@ take =
           Just (h, t) -> cons h (take (pred n) t)
     _ ->
       const $ mzero
+
+-- |
+-- A trasformation, 
+-- reproducing the behaviour of @Data.List.'Data.List.drop'@.
+{-# INLINABLE drop #-}
+drop :: (Monad m, ListMonad (t m), ListTrans t) => Int -> t m a -> t m a
+drop =
+  \case
+    n | n > 0 ->
+      lift . uncons >=> maybe mzero (drop (pred n) . snd)
+    _ ->
+      id
+
+
+
