@@ -260,7 +260,7 @@ take =
 -- A trasformation, 
 -- reproducing the behaviour of @Data.List.'Data.List.drop'@.
 {-# INLINABLE drop #-}
-drop :: (Monad m, ListMonad (t m), ListTrans t) => Int -> t m a -> t m a
+drop :: (Monad m, MonadPlus (t m), ListTrans t) => Int -> t m a -> t m a
 drop =
   \case
     n | n > 0 ->
