@@ -23,6 +23,7 @@ module ListT
   -- without actually traversing the stream.
   -- They only get applied with a single traversal, 
   -- which happens at the execution.
+  Transformation,
   traverse,
   take,
   drop,
@@ -246,20 +247,28 @@ repeat =
 -------------------------
 
 -- |
--- A transformation,
+-- A transformation function from on a list transformer.
+-- It may update the structure or the result type, 
+-- but the type of the transformer remains the same.
+type Transformation m a b = 
+  forall t. (Monad m, ListMonad (t m), ListTrans t) =>
+  t m a -> t m b
+
+-- |
+-- Produce a transformation,
 -- which traverses the stream with an action in the inner monad.
 {-# INLINABLE traverse #-}
-traverse :: (Monad m, ListMonad (t m), ListTrans t) => (a -> m b) -> t m a -> t m b
+traverse :: (a -> m b) -> Transformation m a b
 traverse f s =
   lift (uncons s) >>= 
   mapM (\(h, t) -> lift (f h) >>= \h' -> cons h' (traverse f t)) >>=
   maybe mzero return
 
 -- |
--- A trasformation, 
+-- Produce a transformation,
 -- reproducing the behaviour of @Data.List.'Data.List.take'@.
 {-# INLINABLE take #-}
-take :: (Monad m, ListMonad (t m), ListTrans t) => Int -> t m a -> t m a
+take :: Int -> Transformation m a a
 take =
   \case
     n | n > 0 -> \t ->
@@ -271,10 +280,10 @@ take =
       const $ mzero
 
 -- |
--- A trasformation, 
+-- Produce a transformation,
 -- reproducing the behaviour of @Data.List.'Data.List.drop'@.
 {-# INLINABLE drop #-}
-drop :: (Monad m, MonadPlus (t m), ListTrans t) => Int -> t m a -> t m a
+drop :: Int -> Transformation m a a
 drop =
   \case
     n | n > 0 ->
