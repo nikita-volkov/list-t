@@ -27,6 +27,7 @@ module ListT
   traverse,
   take,
   drop,
+  slice,
   -- * Positive numbers
   Positive,
   positive,
@@ -293,6 +294,16 @@ drop =
       lift . uncons >=> maybe mzero (drop (pred n) . snd)
     _ ->
       id
+
+-- |
+-- Produce a transformation,
+-- which slices a list into chunks of the specified length.
+{-# INLINABLE slice #-}
+slice :: Positive Int -> Transformation m a [a]
+slice n l = 
+  do
+    (h, t) <- lift $ splitAt (case n of Positive n -> n) l
+    cons h (slice n t)
 
 
 -- * Positive numbers
