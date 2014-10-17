@@ -262,9 +262,12 @@ repeat =
 -------------------------
 
 -- |
--- A transformation function from on a list transformer.
+-- A transformation function on a list transformer.
 -- It may update the structure or the result type, 
 -- but the type of the transformer remains the same.
+-- 
+-- Since it's merely just a function,
+-- you can run it by passing a list transformer as an argument.
 type Transformation m a b = 
   forall t. (Monad m, ListMonad (t m), ListTrans t) =>
   t m a -> t m b
