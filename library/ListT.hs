@@ -27,6 +27,9 @@ module ListT
   traverse,
   take,
   drop,
+  -- * Positive numbers
+  Positive,
+  positive,
 )
 where
 
@@ -292,4 +295,21 @@ drop =
       id
 
 
+-- * Positive numbers
+-------------------------
+
+-- |
+-- A newtype wrapper around a number,
+-- which ensures that it is greater than zero.
+newtype Positive n = 
+  Positive n
+  deriving (Show, Read, Eq, Ord, Typeable, Data, Generic)
+
+-- |
+-- A smart constructor for positive numbers.
+positive :: (Ord n, Num n) => n -> Maybe (Positive n)
+positive =
+  \case
+    n | n > 0 -> Just $ Positive n
+    _ -> Nothing
 
