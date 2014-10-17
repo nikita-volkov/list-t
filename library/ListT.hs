@@ -11,6 +11,7 @@ module ListT
   null,
   fold,
   toList,
+  toReverseList,
   traverse_,
   splitAt,
   -- * Construction utilities
@@ -200,6 +201,14 @@ fold s r =
 toList :: (Monad m, ListTrans t) => t m a -> m [a]
 toList =
   liftM ($ []) . fold (\f e -> return $ f . (e :)) id
+
+-- |
+-- Execute, folding to a list in a reverse order.
+-- Performs more efficiently than 'toList'.
+{-# INLINABLE toReverseList #-}
+toReverseList :: (Monad m, ListTrans t) => t m a -> m [a]
+toReverseList =
+  ListT.fold (\l -> return . (:l)) []
 
 -- |
 -- Execute, traversing the stream with a side effect in the inner monad. 
