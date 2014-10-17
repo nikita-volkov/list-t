@@ -303,7 +303,9 @@ slice :: Positive Int -> Transformation m a [a]
 slice n l = 
   do
     (h, t) <- lift $ splitAt (case n of Positive n -> n) l
-    cons h (slice n t)
+    case h of
+      [] -> mzero
+      _ -> cons h (slice n t)
 
 
 -- * Positive numbers

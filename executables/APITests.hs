@@ -124,6 +124,10 @@ test_drop =
   assertEqual [3, 4] =<< do
     toList $ L.drop 2 $ L.fromFoldable [1 .. 4]
     
+test_slice =
+  assertEqual ["abc", "def", "gh"] =<< do
+    toList $ L.slice (fromJust $ L.positive 3) $ L.fromFoldable ("abcdefgh" :: [Char])
+
 
 toList :: Monad m => L.ListT m a -> m [a]
 toList = L.toList
