@@ -6,7 +6,7 @@ synopsis:
   ListT done right
 description:
   A correct implementation of the list monad-transformer.
-  Useful for streaming of mutable datastructures.
+  Useful for basic streaming.
 category:
   Data Structures, Control, Monad, Data
 homepage:
