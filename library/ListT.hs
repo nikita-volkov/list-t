@@ -12,6 +12,7 @@ module ListT
   fold,
   toList,
   traverse_,
+  splitAt,
   -- * Construction utilities
   fromFoldable,
   unfold,
@@ -28,7 +29,7 @@ module ListT
 )
 where
 
-import BasePrelude hiding (toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_)
+import BasePrelude hiding (toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_, splitAt)
 import Control.Monad.Morph
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -201,6 +202,19 @@ toList =
 traverse_ :: (Monad m, ListTrans t) => (a -> m ()) -> t m a -> m ()
 traverse_ f =
   fold (const f) ()
+
+{-# INLINABLE splitAt #-}
+splitAt :: (Monad m, ListTrans t, MonadPlus (t m)) => Int -> t m a -> m ([a], t m a)
+splitAt =
+  \case
+    n | n > 0 -> \l ->
+      uncons l >>= \case
+        Nothing -> return ([], mzero)
+        Just (h, t) -> do
+          (r1, r2) <- splitAt (pred n) t
+          return (h : r1, r2)
+    _ -> \l -> 
+      return ([], l)
 
 
 -- * Construction
