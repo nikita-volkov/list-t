@@ -208,6 +208,8 @@ traverse_ :: (Monad m, ListTrans t) => (a -> m ()) -> t m a -> m ()
 traverse_ f =
   fold (const f) ()
 
+-- |
+-- Execute, consuming a list of the specified length and returning the remainder stream.
 {-# INLINABLE splitAt #-}
 splitAt :: (Monad m, ListTrans t, MonadPlus (t m)) => Int -> t m a -> m ([a], t m a)
 splitAt =
