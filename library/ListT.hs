@@ -36,7 +36,7 @@ module ListT
 where
 
 import BasePrelude hiding (toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_, splitAt)
-import Control.Monad.Morph
+import Control.Monad.Morph hiding (MonadTrans(..))
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader
