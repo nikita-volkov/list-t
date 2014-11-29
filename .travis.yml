@@ -5,11 +5,15 @@ ghc:
   - 7.8
 
 env:
-  - transformers=0.2.*
-  - transformers=0.4.*
+  - lower_bound_dependencies=1
+  - lower_bound_dependencies=0
 
 install:
-  - cabal install "transformers == $transformers"
-  - cabal install happy -j # a "haskell-src-exts" implicit dependency workaround
+  # Install the lower bound dependencies
+  - if [ $lower_bound_dependencies -eq 1 ];
+    then
+      cabal install -j "transformers == 0.2.*";
+    fi;
+  - cabal install -j happy # a "haskell-src-exts" implicit dependency workaround
   - cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls -j
 
