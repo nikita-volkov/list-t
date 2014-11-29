@@ -6,14 +6,30 @@ ghc:
 
 env:
   - lower_bound_dependencies=1
-  - lower_bound_dependencies=0
+  - 
 
 install:
+  # Set up the Shell to treat the semicolon as &&
+  - set -o pipefail && set -e
+  # Switch to the distro:
+  - 
+    export pkg_name=$(cabal info . | awk '{print $2;exit}');
+    cabal sdist;
+    cd dist;
+    tar xzvf $pkg_name.tar.gz;
+    cd $pkg_name;
   # Install the lower bound dependencies
-  - if [ $lower_bound_dependencies -eq 1 ];
+  - 
+    if [ $lower_bound_dependencies -eq 1 ];
     then
-      cabal install -j "transformers == 0.2.*";
+      cabal install "transformers == 0.2.*";
     fi;
-  - cabal install -j happy # a "haskell-src-exts" implicit dependency workaround
-  - cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls -j
+  # Install the "haskell-src-exts" implicit dependency
+  - cabal install happy
+  # Install the remaining dependencies
+  - cabal install --only-dependencies --enable-tests --enable-benchmarks
+  # Configure and build
+  - cabal configure --enable-tests --enable-benchmarks && cabal build
 
+script:
+  - cabal test --show-details=always
