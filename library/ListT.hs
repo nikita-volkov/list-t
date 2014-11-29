@@ -262,9 +262,7 @@ repeat =
 -------------------------
 
 -- |
--- A transformation function on a list transformer.
--- It may update the structure or the result type, 
--- but the type of the transformer remains the same.
+-- A function, which updates the contents of a list transformer.
 -- 
 -- Since it's merely just a function,
 -- you can run it by passing a list transformer as an argument.
@@ -273,7 +271,7 @@ type Transformation m a b =
   t m a -> t m b
 
 -- |
--- Produce a transformation,
+-- A transformation,
 -- which traverses the stream with an action in the inner monad.
 {-# INLINABLE traverse #-}
 traverse :: (a -> m b) -> Transformation m a b
@@ -283,7 +281,7 @@ traverse f s =
   maybe mzero return
 
 -- |
--- Produce a transformation,
+-- A transformation,
 -- reproducing the behaviour of @Data.List.'Data.List.take'@.
 {-# INLINABLE take #-}
 take :: Int -> Transformation m a a
@@ -298,7 +296,7 @@ take =
       const $ mzero
 
 -- |
--- Produce a transformation,
+-- A transformation,
 -- reproducing the behaviour of @Data.List.'Data.List.drop'@.
 {-# INLINABLE drop #-}
 drop :: Int -> Transformation m a a
@@ -310,7 +308,7 @@ drop =
       id
 
 -- |
--- Produce a transformation,
+-- A transformation,
 -- which slices a list into chunks of the specified length.
 {-# INLINABLE slice #-}
 slice :: Positive Int -> Transformation m a [a]
