@@ -133,7 +133,7 @@ instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
 -------------------------
 
 -- |
--- A monad transformer capable of executing like a list.
+-- A monad transformer capable of deconstructing like a list.
 class MonadTrans t => ListTrans t where
   -- |
   -- Execute in the inner monad,
