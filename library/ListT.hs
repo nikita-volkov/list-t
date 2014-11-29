@@ -44,7 +44,7 @@ import Control.Monad.Trans.Control
 import Control.Monad.Base
 
 -- |
--- A proper implementation of a list monad-transformer.
+-- A proper implementation of the list monad-transformer.
 -- Useful for streaming of monadic data structures.
 -- 
 -- Since it has instances of 'MonadPlus' and 'Alternative',
