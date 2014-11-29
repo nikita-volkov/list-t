@@ -139,7 +139,7 @@ class MonadTrans t => MonadTransUncons t where
   -- Execute in the inner monad,
   -- getting the head and the tail.
   -- Returns nothing if it's empty.
-  uncons :: t m a -> m (Maybe (a, t m a))
+  uncons :: Monad m => t m a -> m (Maybe (a, t m a))
 
 instance MonadTransUncons ListT where
   {-# INLINE uncons #-}
