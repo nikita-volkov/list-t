@@ -54,13 +54,13 @@ library
     Haskell2010
 
 
-test-suite api-tests
+test-suite tests
   type:
     exitcode-stdio-1.0
   hs-source-dirs:
-    executables
+    tests
   main-is:
-    APITests.hs
+    Main.hs
   build-depends:
     list-t,
     HTF == 0.12.*,
