@@ -10,6 +10,7 @@ module ListT
   tail,
   null,
   fold,
+  foldMaybe,
   toList,
   toReverseList,
   traverse_,
@@ -40,6 +41,7 @@ import Control.Monad.Morph hiding (MonadTrans(..))
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader
+import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Control
 import Control.Monad.Base
 
@@ -194,6 +196,16 @@ null =
 fold :: (Monad m, MonadTransUncons t) => (r -> a -> m r) -> r -> t m a -> m r
 fold s r = 
   uncons >=> maybe (return r) (\(h, t) -> s r h >>= \r' -> fold s r' t)
+
+-- |
+-- A version of 'fold', which allows early termination.
+{-# INLINABLE foldMaybe #-}
+foldMaybe :: (Monad m, MonadTransUncons t) => (r -> a -> m (Maybe r)) -> r -> t m a -> m r
+foldMaybe s r l =
+  liftM (maybe r id) $ runMaybeT $ do
+    (h, t) <- MaybeT $ uncons l
+    r' <- MaybeT $ s r h
+    lift $ foldMaybe s r' t
 
 -- |
 -- Execute, folding to a list.
