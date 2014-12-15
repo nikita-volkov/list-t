@@ -120,12 +120,12 @@ instance MonadBase b m => MonadBase b (ListT m) where
     lift . liftBase
 
 instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
-  newtype StM (ListT m) a =
-    StM (StM m (Maybe (a, ListT m a)))
+  type StM (ListT m) a =
+    StM m (Maybe (a, ListT m a))
   liftBaseWith runToBase =
     lift $ liftBaseWith $ \runInner -> 
-      runToBase $ liftM StM . runInner . uncons
-  restoreM (StM inner) =
+      runToBase $ runInner . uncons
+  restoreM inner =
     lift (restoreM inner) >>= \case
       Nothing -> mzero
       Just (h, t) -> cons h t
