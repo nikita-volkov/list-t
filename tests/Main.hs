@@ -2,11 +2,30 @@
 
 import BasePrelude hiding (toList)
 import MTLPrelude
+import Control.Monad.Morph
 import Test.Framework
 import qualified ListT as L
 
 
 main = htfMain $ htf_thisModulesTests
+
+
+-- * MMonad
+-------------------------
+
+-- embed lift = id
+prop_mmonadLaw1 (l :: [Int]) =
+  let s = L.fromFoldable l
+      in runIdentity $ streamsEqual s (embed lift s)
+
+-- embed f (lift m) = f m
+prop_mmonadLaw2 l =
+  let s = (L.fromFoldable :: [Int] -> L.ListT Identity Int) l
+      f = MaybeT . fmap Just
+      run = runIdentity . L.toList . runMaybeT
+      in 
+        run (f s) == 
+        run (embed f (lift s))
 
 
 -- * Applicative

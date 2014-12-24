@@ -42,7 +42,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.Control
+import Control.Monad.Trans.Control hiding (embed, embed_)
 import Control.Monad.Base
 
 -- |
@@ -114,6 +114,12 @@ instance MonadIO m => MonadIO (ListT m) where
 instance MFunctor ListT where
   hoist f (ListT m) =
     ListT $ f $ m >>= return . fmap (\(h, t) -> (h, hoist f t))
+
+instance MMonad ListT where
+  embed f (ListT m) =
+    f m >>= \case
+      Nothing -> mzero
+      Just (h, t) -> ListT $ return $ Just $ (h, embed f t)
 
 instance MonadBase b m => MonadBase b (ListT m) where
   liftBase =
