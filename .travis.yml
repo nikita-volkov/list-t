@@ -11,6 +11,8 @@ env:
 install:
   # Set up the Shell to treat the semicolon as &&
   - set -o pipefail && set -e
+  # Update the Cabal database
+  - cabal update
   # Switch to the distro:
   - 
     export pkg_name=$(cabal info . | awk '{print $2;exit}');
@@ -22,13 +24,19 @@ install:
   - 
     if [ $lower_bound_dependencies -eq 1 ];
     then
-      cabal install "transformers == 0.2.*";
+      constraint_options=(
+        "--constraint=transformers==0.2.*"
+      );
     fi;
   # Install the "haskell-src-exts" implicit dependency
-  - cabal install happy
+  - cabal install -j ${constraint_options[@]} happy
+  # Install the library dependencies
+  - cabal install -j ${constraint_options[@]} --only-dependencies
+  # Build the library
+  - cabal build
   # Install the remaining dependencies
-  - cabal install --only-dependencies --enable-tests --enable-benchmarks
-  # Configure and build
+  - cabal install -j --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls
+  # Configure and build the remaining stuff
   - cabal configure --enable-tests --enable-benchmarks && cabal build
 
 script:
