@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances, CPP #-}
 module ListT
 (
   ListT,
@@ -125,6 +125,7 @@ instance MonadBase b m => MonadBase b (ListT m) where
   liftBase =
     lift . liftBase
 
+#if MIN_VERSION_monad_control(1,0,0)
 instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
   type StM (ListT m) a =
     StM m (Maybe (a, ListT m a))
@@ -135,7 +136,18 @@ instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
     lift (restoreM inner) >>= \case
       Nothing -> mzero
       Just (h, t) -> cons h t
-
+#else
+instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
+  newtype StM (ListT m) a =
+    StM (StM m (Maybe (a, ListT m a)))
+  liftBaseWith runToBase =
+    lift $ liftBaseWith $ \runInner -> 
+      runToBase $ liftM StM . runInner . uncons
+  restoreM (StM inner) =
+    lift (restoreM inner) >>= \case
+      Nothing -> mzero
+      Just (h, t) -> cons h t
+#endif
 
 -- * Classes
 -------------------------
