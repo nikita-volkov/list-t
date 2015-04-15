@@ -39,6 +39,7 @@ where
 import BasePrelude hiding (uncons, toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_, splitAt)
 import Control.Monad.Morph hiding (MonadTrans(..))
 import Control.Monad.IO.Class
+import Control.Monad.Error.Class 
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.Maybe
@@ -54,7 +55,7 @@ import Control.Monad.Base
 -- <http://hackage.haskell.org/package/monadplus "monadplus">
 -- with it.
 newtype ListT m a =
-  ListT (m (Maybe (a, ListT m a)))
+  ListT { unListT :: m (Maybe (a, ListT m a)) }
 
 instance Monad m => Monoid (ListT m a) where
   mempty =
@@ -148,6 +149,10 @@ instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
       Nothing -> mzero
       Just (h, t) -> cons h t
 #endif
+
+instance MonadError e m => MonadError e (ListT m) where
+  throwError = ListT . throwError
+  catchError m handler = ListT $ catchError (unListT m) $ unListT . handler
 
 -- * Classes
 -------------------------
