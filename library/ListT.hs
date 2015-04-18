@@ -17,6 +17,7 @@ module ListT
   splitAt,
   -- * Construction utilities
   fromFoldable,
+  fromMVar,
   unfold,
   repeat,
   -- * Transformation utilities
@@ -277,6 +278,12 @@ splitAt =
 fromFoldable :: (MonadCons m, Foldable f) => f a -> m a
 fromFoldable = 
   foldr cons mzero
+
+-- |
+-- Construct from an MVar, interpreting a value of Nothing as an end.
+fromMVar :: (MonadCons m, MonadIO m) => MVar (Maybe a) -> m a
+fromMVar v =
+  liftIO (takeMVar v) >>= maybe mzero (flip cons (fromMVar v))
 
 -- |
 -- Construct by unfolding a pure data structure.
