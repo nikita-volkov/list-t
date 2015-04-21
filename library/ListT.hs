@@ -283,7 +283,7 @@ fromFoldable =
 -- Construct from an MVar, interpreting a value of Nothing as an end.
 fromMVar :: (MonadCons m, MonadIO m) => MVar (Maybe a) -> m a
 fromMVar v =
-  liftIO (takeMVar v) >>= maybe mzero (flip cons (fromMVar v))
+  fix $ \loop -> liftIO (takeMVar v) >>= maybe mzero (flip cons loop)
 
 -- |
 -- Construct by unfolding a pure data structure.
