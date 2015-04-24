@@ -25,7 +25,7 @@ install:
     if [ $lower_bound_dependencies -eq 1 ];
     then
       constraint_options=(
-        "--constraint=transformers==0.2.*"
+        "--constraint=transformers==0.3.*"
         "--constraint=monad-control==0.3.*"
       );
     fi;

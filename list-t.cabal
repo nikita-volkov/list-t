@@ -1,7 +1,7 @@
 name:
   list-t
 version:
-  0.4.5
+  0.4.5.1
 synopsis:
   ListT done right
 description:
@@ -47,7 +47,7 @@ library
     monad-control >= 0.3 && < 1.1,
     mtl == 2.*,
     transformers-base == 0.4.*,
-    transformers >= 0.2 && < 0.5,
+    transformers >= 0.3 && < 0.5,
     base-prelude == 0.1.*
   default-extensions:
     Arrows, BangPatterns, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFunctor, DeriveGeneric, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, ImpredicativeTypes, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeFamilies, TypeOperators, UnboxedTuples
