@@ -8,7 +8,7 @@ description:
   A correct implementation of the list monad-transformer.
   Useful for basic streaming.
 category:
-  Data Structures, Control, Monad, Data
+  Streaming, Data Structures, Control
 homepage:
   https://github.com/nikita-volkov/list-t 
 bug-reports:
