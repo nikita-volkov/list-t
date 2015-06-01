@@ -19,6 +19,7 @@ module ListT
   fromFoldable,
   fromMVar,
   unfold,
+  unfoldM,
   repeat,
   -- * Transformation utilities
   -- | 
@@ -291,6 +292,18 @@ fromMVar v =
 unfold :: (MonadCons m) => (b -> Maybe (a, b)) -> b -> m a
 unfold f s =
   maybe mzero (\(h, t) -> cons h (unfold f t)) (f s)
+
+-- |
+-- Construct by unfolding a monadic data structure
+--
+-- This is the most memory-efficient way to construct a ListT where
+-- the length depends on the inner monad.
+{-# INLINABLE unfoldM #-}
+unfoldM :: (Monad m) => (b -> m (Maybe (a, b))) -> b -> ListT m a
+unfoldM f = go where
+  go s = ListT $ f s >>= \case
+    Nothing -> return Nothing
+    Just (a,r) -> return (Just (a, go r))
 
 -- |
 -- Produce an infinite stream.
