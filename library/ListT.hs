@@ -19,6 +19,7 @@ module ListT
   fromFoldable,
   fromMVar,
   unfold,
+  unfoldM,
   repeat,
   -- * Transformation utilities
   -- | 
