@@ -73,8 +73,8 @@ instance Monad m => Monoid (ListT m a) where
             return (Just (h1, (mappend s1' (ListT m2))))
 
 instance Functor m => Functor (ListT m) where
-  fmap f (ListT m) =
-    ListT $ (fmap . fmap) (\(a, b) -> (f a, fmap f b)) m
+  fmap f =
+    ListT . (fmap . fmap) (f *** fmap f) . unListT
 
 instance (Monad m, Functor m) => Applicative (ListT m) where
   pure = 
@@ -115,8 +115,8 @@ instance MonadIO m => MonadIO (ListT m) where
     lift . liftIO
 
 instance MFunctor ListT where
-  hoist f (ListT m) =
-    ListT $ f $ (fmap . fmap) (\(h, t) -> (h, hoist f t)) m
+  hoist f =
+    ListT . f . (fmap . fmap) (id *** hoist f) . unListT
 
 instance MMonad ListT where
   embed f (ListT m) =
