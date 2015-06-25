@@ -116,7 +116,7 @@ instance MonadIO m => MonadIO (ListT m) where
 
 instance MFunctor ListT where
   hoist f (ListT m) =
-    ListT $ f $ m >>= return . fmap (\(h, t) -> (h, hoist f t))
+    ListT $ f $ (fmap . fmap) (\(h, t) -> (h, hoist f t)) m
 
 instance MMonad ListT where
   embed f (ListT m) =
