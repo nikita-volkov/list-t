@@ -116,7 +116,7 @@ instance MonadIO m => MonadIO (ListT m) where
 
 instance MFunctor ListT where
   hoist f =
-    ListT . f . (fmap . fmap) (id *** hoist f) . unListT
+    ListT . f . (liftM . fmap) (id *** hoist f) . unListT
 
 instance MMonad ListT where
   embed f (ListT m) =
