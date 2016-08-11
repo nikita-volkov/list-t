@@ -196,7 +196,7 @@ toList =
   liftM ($ []) . fold (\f e -> return $ f . (e :)) id
 
 -- |
--- Execute, folding to a list in a reverse order.
+-- Execute, folding to a list in the reverse order.
 -- Performs more efficiently than 'toList'.
 {-# INLINABLE toReverseList #-}
 toReverseList :: Monad m => ListT m a -> m [a]
@@ -243,7 +243,7 @@ fromFoldable =
   foldr cons mzero
 
 -- |
--- Construct from an MVar, interpreting a value of Nothing as an end.
+-- Construct from an MVar, interpreting the value of Nothing as the end.
 fromMVar :: (MonadIO m) => MVar (Maybe a) -> ListT m a
 fromMVar v =
   fix $ \loop -> liftIO (takeMVar v) >>= maybe mzero (flip cons loop)
@@ -258,7 +258,7 @@ unfold f s =
 -- |
 -- Construct by unfolding a monadic data structure
 --
--- This is the most memory-efficient way to construct a ListT where
+-- This is the most memory-efficient way to construct ListT where
 -- the length depends on the inner monad.
 {-# INLINABLE unfoldM #-}
 unfoldM :: Monad m => (b -> m (Maybe (a, b))) -> b -> ListT m a
