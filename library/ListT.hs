@@ -42,6 +42,7 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Control hiding (embed, embed_)
 import Control.Monad.Base
+import qualified Data.Semigroup as Sem
 
 -- |
 -- A proper implementation of the list monad-transformer.
@@ -54,11 +55,8 @@ import Control.Monad.Base
 newtype ListT m a =
   ListT (m (Maybe (a, ListT m a)))
 
-instance Monad m => Monoid (ListT m a) where
-  mempty =
-    ListT $ 
-      return Nothing
-  mappend (ListT m1) (ListT m2) =
+instance Monad m => Sem.Semigroup (ListT m a) where
+  (<>) (ListT m1) (ListT m2) =
     ListT $
       m1 >>=
         \case
@@ -66,6 +64,12 @@ instance Monad m => Monoid (ListT m a) where
             m2
           Just (h1, s1') ->
             return (Just (h1, (mappend s1' (ListT m2))))
+
+instance Monad m => Monoid (ListT m a) where
+  mempty =
+    ListT $ 
+      return Nothing
+  mappend = (<>)
 
 instance Functor m => Functor (ListT m) where
   fmap f =
