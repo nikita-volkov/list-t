@@ -63,7 +63,7 @@ instance Monad m => Sem.Semigroup (ListT m a) where
           Nothing ->
             m2
           Just (h1, s1') ->
-            return (Just (h1, (mappend s1' (ListT m2))))
+            return (Just (h1, ((<>) s1' (ListT m2))))
 
 instance Monad m => Monoid (ListT m a) where
   mempty =
