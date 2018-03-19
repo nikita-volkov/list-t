@@ -39,16 +39,16 @@ source-repository head
 library
   hs-source-dirs:
     library
-  other-modules:
   exposed-modules:
     ListT
+  other-modules:
+    ListT.Prelude
   build-depends:
     mmorph == 1.*,
     monad-control >= 0.3 && < 2,
     mtl == 2.*,
     transformers-base == 0.4.*,
     transformers >= 0.3 && < 0.6,
-    base-prelude < 2,
     base < 5
   if !impl(ghc >= 8.0)
     build-depends:
