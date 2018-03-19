@@ -33,7 +33,7 @@ module ListT
 )
 where
 
-import BasePrelude hiding (uncons, toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_, splitAt)
+import BasePrelude hiding ((<>), uncons, toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_, splitAt)
 import Control.Monad.Morph hiding (MonadTrans(..))
 import Control.Monad.IO.Class
 import Control.Monad.Error.Class 
@@ -42,7 +42,7 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Control hiding (embed, embed_)
 import Control.Monad.Base
-import qualified Data.Semigroup as Sem
+import Data.Semigroup
 
 -- |
 -- A proper implementation of the list monad-transformer.
@@ -55,7 +55,7 @@ import qualified Data.Semigroup as Sem
 newtype ListT m a =
   ListT (m (Maybe (a, ListT m a)))
 
-instance Monad m => Sem.Semigroup (ListT m a) where
+instance Monad m => Semigroup (ListT m a) where
   (<>) (ListT m1) (ListT m2) =
     ListT $
       m1 >>=
