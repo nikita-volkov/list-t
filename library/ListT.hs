@@ -90,6 +90,10 @@ instance Monad m => Monad (ListT m) where
           Just (h1, t1) ->
             uncons $ k2 h1 <> (t1 >>= k2)
 
+instance Monad m => MonadFail (ListT m) where
+  fail _ =
+    inline mempty
+
 instance Monad m => MonadPlus (ListT m) where
   mzero = 
     inline mempty
