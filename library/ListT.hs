@@ -34,6 +34,7 @@ module ListT
 where
 
 import ListT.Prelude hiding (uncons, toList, yield, fold, traverse, head, tail, take, drop, repeat, null, traverse_, splitAt)
+import Control.Monad
 
 -- |
 -- A proper implementation of the list monad-transformer.
