@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances, CPP #-}
 module ListT
 (
   ListT(..),
@@ -89,6 +89,10 @@ instance Monad m => Monad (ListT m) where
             return Nothing
           Just (h1, t1) ->
             uncons $ k2 h1 <> (t1 >>= k2)
+#if !MIN_VERSION_base(4,11,0)
+  fail _ =
+    mempty
+#endif
 
 instance Monad m => MonadFail (ListT m) where
   fail _ =
