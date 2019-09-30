@@ -9,6 +9,7 @@ import Control.Arrow as Exports
 import Control.Category as Exports
 import Control.Concurrent as Exports
 import Control.Exception as Exports
+import Control.Foldl as Exports (Fold(..), FoldM(..))
 import Control.Monad as Exports hiding (mapM_, sequence_, forM_, msum, mapM, sequence, forM, fail)
 import Control.Monad.Base as Exports
 import Control.Monad.Error.Class as Exports

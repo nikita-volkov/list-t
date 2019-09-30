@@ -9,6 +9,7 @@ module ListT
   null,
   fold,
   foldMaybe,
+  applyFoldM,
   toList,
   toReverseList,
   traverse_,
@@ -191,6 +192,14 @@ foldMaybe s r l =
     (h, t) <- MaybeT $ uncons l
     r' <- MaybeT $ s r h
     lift $ foldMaybe s r' t
+
+-- |
+-- Apply a left fold abstraction from the \"foldl\" package.
+applyFoldM :: Monad m => FoldM m i o -> ListT m i -> m o
+applyFoldM (FoldM step init extract) lt = do
+  a <- init
+  b <- fold step a lt
+  extract b
 
 -- |
 -- Execute, folding to a list.
