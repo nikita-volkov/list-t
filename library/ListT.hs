@@ -205,6 +205,30 @@ instance Monad m => MonadLogic (ListT m) where
 
   lnot m = msplit m >>= maybe (pure ()) (const empty)
 
+instance MonadZip m => MonadZip (ListT m) where
+  mzipWith f = go
+    where
+      go (ListT m1) (ListT m2) =
+        ListT $ mzipWith (mzipWith $
+                     \(a, as) (b, bs) -> (f a b, go as bs)) m1 m2
+
+  munzip (ListT m)
+    | (l, r) <- munzip (fmap go m)
+    = (ListT l, ListT r)
+    where
+      go Nothing = (Nothing, Nothing)
+      go (Just ((a, b), listab))
+        = (Just (a, la), Just (b, lb))
+        where
+          -- If the underlying munzip is careful not to leak memory, then we
+          -- don't want to defeat it.  We need to be sure that la and lb are
+          -- realized as selector thunks.
+          {-# NOINLINE remains #-}
+          {-# NOINLINE la #-}
+          {-# NOINLINE lb #-}
+          remains = munzip listab
+          (la, lb) = remains
+
 -- * Execution in the inner monad
 -------------------------
 
