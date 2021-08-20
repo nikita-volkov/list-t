@@ -1,9 +1,4 @@
-{-# LANGUAGE UndecidableInstances, CPP #-}
-{-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE CPP #-}
 module ListT
 (
   ListT(..),
