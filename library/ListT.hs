@@ -240,10 +240,10 @@ null =
 -- Execute in the inner monad,
 -- using its 'mplus' function on each entry.
 {-# INLINABLE alternate #-}
-alternate :: MonadPlus m => ListT m a -> m a
+alternate :: (Alternative m, Monad m) => ListT m a -> m a
 alternate (ListT m) = m >>= \case
-  Nothing -> mzero
-  Just (a, as) -> mplus (return a) (alternate as)
+  Nothing -> empty
+  Just (a, as) -> pure a <|> alternate as
 
 -- |
 -- Execute, applying a left fold.
