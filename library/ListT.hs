@@ -1,4 +1,9 @@
 {-# LANGUAGE UndecidableInstances, CPP #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module ListT
 (
   ListT(..),
@@ -47,6 +52,48 @@ import Control.Monad
 -- with it.
 newtype ListT m a =
   ListT (m (Maybe (a, ListT m a)))
+  deriving (Foldable, Traversable, Generic)
+
+deriving instance Show (m (Maybe (a, ListT m a))) => Show (ListT m a)
+deriving instance Read (m (Maybe (a, ListT m a))) => Read (ListT m a)
+deriving instance Eq (m (Maybe (a, ListT m a))) => Eq (ListT m a)
+deriving instance Ord (m (Maybe (a, ListT m a))) => Ord (ListT m a)
+deriving instance (Typeable m, Typeable a, Data (m (Maybe (a, ListT m a)))) => Data (ListT m a)
+
+instance Eq1 m => Eq1 (ListT m) where
+  liftEq eq = go
+    where
+      go (ListT m) (ListT n) = liftEq (liftEq (\(a, as) (b, bs) -> eq a b && go as bs)) m n
+
+instance Ord1 m => Ord1 (ListT m) where
+  liftCompare cmp = go
+    where
+      go (ListT m) (ListT n) = liftCompare (liftCompare (\(a, as) (b, bs) -> cmp a b <> go as bs)) m n
+
+instance Show1 m => Show1 (ListT m) where
+  -- I wish I were joking.
+  liftShowsPrec sp (sl :: [a] -> ShowS) = mark
+    where
+      bob :: Int -> m (Maybe (a, ListT m a)) -> ShowS
+      bob = liftShowsPrec jill edith
+
+      edith :: [Maybe (a, ListT m a)] -> ShowS
+      edith = liftShowList jack martha
+
+      jill :: Int -> Maybe (a, ListT m a) -> ShowS
+      jill = liftShowsPrec jack martha
+
+      martha :: [(a, ListT m a)] -> ShowS
+      martha = liftShowList2 sp sl mark juan
+
+      mark :: Int -> ListT m a -> ShowS
+      mark d (ListT m) = showsUnaryWith bob "ListT" d m
+
+      juan :: [ListT m a] -> ShowS
+      juan = liftShowList sp sl
+
+      jack :: Int -> (a, ListT m a) -> ShowS
+      jack = liftShowsPrec2 sp sl mark juan
 
 instance Monad m => Semigroup (ListT m a) where
   (<>) (ListT m1) (ListT m2) =
