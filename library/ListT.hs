@@ -242,7 +242,7 @@ null =
 {-# INLINABLE alternate #-}
 alternate :: MonadPlus m => ListT m a -> m a
 alternate (ListT m) = m >>= \case
-  Nothing -> empty
+  Nothing -> mzero
   Just (a, as) -> mplus (return a) (alternate as)
 
 -- |
