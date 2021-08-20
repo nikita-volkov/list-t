@@ -143,6 +143,24 @@ instance MonadError e m => MonadError e (ListT m) where
   throwError = ListT . throwError
   catchError m handler = ListT $ catchError (uncons m) $ uncons . handler
 
+instance Monad m => MonadLogic (ListT m) where
+  msplit (ListT m) = lift m
+
+  -- The below are copied from the defaults currently in
+  -- the logict master branch. The ones on Hackage have some
+  -- extra binds going on.
+  interleave m1 m2 = msplit m1 >>=
+                      maybe m2 (\(a, m1') -> pure a <|> interleave m2 m1')
+
+  m >>- f = msplit m >>= maybe empty
+    (\(a, m') -> interleave (f a) (m' >>- f))
+
+  ifte t th el = msplit t >>= maybe el (\(a,m) -> th a <|> (m >>= th))
+
+  once m = msplit m >>= maybe empty (\(a, _) -> pure a)
+
+  lnot m = msplit m >>= maybe (pure ()) (const empty)
+
 
 -- * Execution in the inner monad
 -------------------------
