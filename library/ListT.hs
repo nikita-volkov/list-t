@@ -8,6 +8,7 @@ module ListT
   tail,
   null,
   alternate,
+  alternateHoisting,
   fold,
   foldMaybe,
   applyFoldM,
@@ -244,6 +245,19 @@ alternate :: (Alternative m, Monad m) => ListT m a -> m a
 alternate (ListT m) = m >>= \case
   Nothing -> empty
   Just (a, as) -> pure a <|> alternate as
+
+-- |
+-- Use a monad morphism to convert a 'ListT' to a similar
+-- monad, such as '[]'.
+-- 
+-- A more efficient alternative to @'alternate' . 'hoist' f@.
+{-# INLINABLE alternateHoisting #-}
+alternateHoisting :: (Monad n, Alternative n) => (forall a. m a -> n a) -> ListT m a -> n a
+alternateHoisting f = go
+  where
+    go (ListT m) = f m >>= \case
+      Nothing -> empty
+      Just (a, as) -> pure a <|> go as
 
 -- |
 -- Execute, applying a left fold.
