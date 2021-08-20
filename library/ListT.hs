@@ -7,6 +7,7 @@ module ListT
   head,
   tail,
   null,
+  alternate,
   fold,
   foldMaybe,
   applyFoldM,
@@ -234,6 +235,17 @@ tail =
 null :: Monad m => ListT m a -> m Bool
 null =
   liftM (maybe True (const False)) . uncons
+
+-- |
+-- Execute in the inner monad,
+-- using its 'mplus' function on each entry.
+{-# INLINABLE alternate #-}
+alternate :: MonadPlus m => ListT m a -> m a
+alternate = go
+  where
+    go (ListT m) = m >>= \case
+      Nothing -> empty
+      Just (a, as) -> mplus (return a) (go as)
 
 -- |
 -- Execute, applying a left fold.
