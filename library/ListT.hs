@@ -31,8 +31,6 @@ module ListT
   take,
   drop,
   slice,
-  fromListT,
-  fromListTWith
 )
 where
 
@@ -204,20 +202,6 @@ instance Monad m => MonadLogic (ListT m) where
   once m = msplit m >>= maybe empty (\(a, _) -> pure a)
 
   lnot m = msplit m >>= maybe (pure ()) (const empty)
-
--- | Convert a 'ListT' to a similar monad transformer, such as
--- @LogicT@.
-fromListT :: (Monad m, Monad (t m), Alternative (t m), MonadTrans t) => ListT m a -> t m a
-fromListT = fromListTWith lift
-
--- | Use a monad morphism to convert a 'ListT' to a similar
--- monad, such as '[]'.
-fromListTWith :: (Monad n, Alternative n) => (forall a. m a -> n a) -> ListT m a -> n a
-fromListTWith f = go
-  where
-    go (ListT m) = f m >>= \case
-      Nothing -> empty
-      Just (a, as) -> pure a <|> go as
 
 -- * Execution in the inner monad
 -------------------------
