@@ -241,11 +241,9 @@ null =
 -- using its 'mplus' function on each entry.
 {-# INLINABLE alternate #-}
 alternate :: MonadPlus m => ListT m a -> m a
-alternate = go
-  where
-    go (ListT m) = m >>= \case
-      Nothing -> empty
-      Just (a, as) -> mplus (return a) (go as)
+alternate (ListT m) = m >>= \case
+  Nothing -> empty
+  Just (a, as) -> mplus (return a) (alternate as)
 
 -- |
 -- Execute, applying a left fold.
