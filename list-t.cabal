@@ -47,6 +47,6 @@ test-suite tests
   build-depends:
     list-t,
     mmorph,
-    HTF ==0.13.*,
+    HTF ==0.14.*,
     mtl-prelude <3,
     base-prelude
