@@ -108,9 +108,16 @@ instance Monad m => Monoid (ListT m a) where
       return Nothing
   mappend = (<>)
 
+-- A slightly stricter version of Data.Bifunctor.bimap.
+-- There's no benefit to producing lazy pairs here.
+bimapPair' :: (a -> b) -> (c -> d) -> (a, c) -> (b, d)
+bimapPair' f g = \(a,c) -> (f a, g c)
+
 instance Functor m => Functor (ListT m) where
-  fmap f =
-    ListT . (fmap . fmap) (f *** fmap f) . uncons
+  fmap f = go
+    where
+      go =
+        ListT . (fmap . fmap) (bimapPair' f go) . uncons
 
 instance (Monad m, Functor m) => Applicative (ListT m) where
   pure = 
@@ -159,8 +166,9 @@ instance MonadIO m => MonadIO (ListT m) where
     lift . liftIO
 
 instance MFunctor ListT where
-  hoist f =
-    ListT . f . (liftM . fmap) (id *** hoist f) . uncons
+  hoist f = go
+    where
+      go = ListT . f . (liftM . fmap) (bimapPair' id go) . uncons
 
 instance MMonad ListT where
   embed f (ListT m) =

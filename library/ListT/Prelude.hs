@@ -5,7 +5,6 @@ module ListT.Prelude
 where
 
 import Control.Applicative as Exports
-import Control.Arrow as Exports
 import Control.Category as Exports
 import Control.Concurrent as Exports
 import Control.Exception as Exports
