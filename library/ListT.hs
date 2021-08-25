@@ -124,24 +124,36 @@ instance (Monad m, Functor m) => Applicative (ListT m) where
     return
   (<*>) = 
     ap
+  -- This is just like liftM2, but it uses fmap over the second
+  -- action. liftM2 can't do that, because it has to deal with
+  -- the possibility that someone defines liftA2 = liftM2 and
+  -- fmap f = (pure f <*>) (leaving (<*>) to the default).
+  liftA2 f m1 m2 = do
+    x1 <- m1
+    fmap (f x1) m2
+  (*>) = (>>)
 
 instance (Monad m, Functor m) => Alternative (ListT m) where
   empty = 
-    inline mzero
+    inline mempty
   (<|>) = 
-    inline mplus
+    inline mappend
 
 instance Monad m => Monad (ListT m) where
   return a =
     ListT $ return (Just (a, (ListT (return Nothing))))
-  (>>=) s1 k2 =
-    ListT $
-      uncons s1 >>=
-        \case
-          Nothing ->
-            return Nothing
-          Just (h1, t1) ->
-            uncons $ k2 h1 <> (t1 >>= k2)
+  -- We use a go function so GHC can inline k2
+  -- if it likes.
+  (>>=) s10 k2 = go s10
+    where
+      go s1 =
+        ListT $
+          uncons s1 >>=
+            \case
+              Nothing ->
+                return Nothing
+              Just (h1, t1) ->
+                uncons $ k2 h1 <> go t1
 #if !MIN_VERSION_base(4,11,0)
   fail _ =
     mempty
@@ -159,7 +171,7 @@ instance Monad m => MonadPlus (ListT m) where
 
 instance MonadTrans ListT where
   lift =
-    ListT . liftM (\a -> Just (a, mempty))
+    ListT . fmap (\a -> Just (a, mempty))
 
 instance MonadIO m => MonadIO (ListT m) where
   liftIO =
@@ -168,7 +180,7 @@ instance MonadIO m => MonadIO (ListT m) where
 instance MFunctor ListT where
   hoist f = go
     where
-      go = ListT . f . (liftM . fmap) (bimapPair' id go) . uncons
+      go = ListT . f . (fmap . fmap) (bimapPair' id go) . uncons
 
 instance MMonad ListT where
   embed f (ListT m) =
@@ -253,21 +265,21 @@ uncons (ListT m) =
 {-# INLINABLE head #-}
 head :: Monad m => ListT m a -> m (Maybe a)
 head =
-  liftM (fmap fst) . uncons
+  fmap (fmap fst) . uncons
 
 -- |
 -- Execute, getting the tail. Returns nothing if it's empty.
 {-# INLINABLE tail #-}
 tail :: Monad m => ListT m a -> m (Maybe (ListT m a))
 tail =
-  liftM (fmap snd) . uncons
+  fmap (fmap snd) . uncons
 
 -- |
 -- Execute, checking whether it's empty.
 {-# INLINABLE null #-}
 null :: Monad m => ListT m a -> m Bool
 null =
-  liftM (maybe True (const False)) . uncons
+  fmap (maybe True (const False)) . uncons
 
 -- |
 -- Execute in the inner monad,
@@ -303,7 +315,7 @@ fold s r =
 {-# INLINABLE foldMaybe #-}
 foldMaybe :: Monad m => (r -> a -> m (Maybe r)) -> r -> ListT m a -> m r
 foldMaybe s r l =
-  liftM (maybe r id) $ runMaybeT $ do
+  fmap (maybe r id) $ runMaybeT $ do
     (h, t) <- MaybeT $ uncons l
     r' <- MaybeT $ s r h
     lift $ foldMaybe s r' t
