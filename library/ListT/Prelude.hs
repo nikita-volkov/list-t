@@ -5,7 +5,6 @@ module ListT.Prelude
 where
 
 import Control.Applicative as Exports
-import Control.Arrow as Exports
 import Control.Category as Exports
 import Control.Concurrent as Exports
 import Control.Exception as Exports
@@ -23,6 +22,7 @@ import Control.Monad.Trans.Class as Exports
 import Control.Monad.Trans.Control as Exports hiding (embed, embed_)
 import Control.Monad.Trans.Maybe as Exports hiding (liftCatch, liftCallCC)
 import Control.Monad.Trans.Reader as Exports hiding (liftCatch, liftCallCC)
+import Control.Monad.Zip as Exports
 import Data.Bits as Exports
 import Data.Bool as Exports
 import Data.Char as Exports

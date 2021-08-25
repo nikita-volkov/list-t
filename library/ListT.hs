@@ -108,9 +108,16 @@ instance Monad m => Monoid (ListT m a) where
       return Nothing
   mappend = (<>)
 
+-- A slightly stricter version of Data.Bifunctor.bimap.
+-- There's no benefit to producing lazy pairs here.
+bimapPair' :: (a -> b) -> (c -> d) -> (a, c) -> (b, d)
+bimapPair' f g = \(a,c) -> (f a, g c)
+
 instance Functor m => Functor (ListT m) where
-  fmap f =
-    ListT . (fmap . fmap) (f *** fmap f) . uncons
+  fmap f = go
+    where
+      go =
+        ListT . (fmap . fmap) (bimapPair' f go) . uncons
 
 instance (Monad m, Functor m) => Applicative (ListT m) where
   pure = 
@@ -171,8 +178,9 @@ instance MonadIO m => MonadIO (ListT m) where
     lift . liftIO
 
 instance MFunctor ListT where
-  hoist f =
-    ListT . f . (fmap . fmap) (id *** hoist f) . uncons
+  hoist f = go
+    where
+      go = ListT . f . (fmap . fmap) (bimapPair' id go) . uncons
 
 instance MMonad ListT where
   embed f (ListT m) =
@@ -216,6 +224,30 @@ instance Monad m => MonadLogic (ListT m) where
   once m = msplit m >>= maybe empty (\(a, _) -> pure a)
 
   lnot m = msplit m >>= maybe (pure ()) (const empty)
+
+instance MonadZip m => MonadZip (ListT m) where
+  mzipWith f = go
+    where
+      go (ListT m1) (ListT m2) =
+        ListT $ mzipWith (mzipWith $
+                     \(a, as) (b, bs) -> (f a b, go as bs)) m1 m2
+
+  munzip (ListT m)
+    | (l, r) <- munzip (fmap go m)
+    = (ListT l, ListT r)
+    where
+      go Nothing = (Nothing, Nothing)
+      go (Just ((a, b), listab))
+        = (Just (a, la), Just (b, lb))
+        where
+          -- If the underlying munzip is careful not to leak memory, then we
+          -- don't want to defeat it.  We need to be sure that la and lb are
+          -- realized as selector thunks.
+          {-# NOINLINE remains #-}
+          {-# NOINLINE la #-}
+          {-# NOINLINE lb #-}
+          remains = munzip listab
+          (la, lb) = remains
 
 -- * Execution in the inner monad
 -------------------------
