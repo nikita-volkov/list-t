@@ -197,6 +197,18 @@ instance MonadError e m => MonadError e (ListT m) where
   throwError = ListT . throwError
   catchError m handler = ListT $ catchError (uncons m) $ uncons . handler
 
+instance MonadReader e m => MonadReader e (ListT m) where
+  ask = lift ask
+  reader = lift . reader
+  local r = go
+    where
+      go (ListT m) = ListT $ local r (fmap (fmap (secondPair' go)) m)
+
+instance MonadState e m => MonadState e (ListT m) where
+  get = lift get
+  put = lift . put
+  state = lift . state
+
 instance Monad m => MonadLogic (ListT m) where
   msplit (ListT m) = lift m
 
