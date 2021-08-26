@@ -273,7 +273,7 @@ null =
 
 -- |
 -- Execute in the inner monad,
--- using its 'mplus' function on each entry.
+-- using its '(<|>)' function on each entry.
 {-# INLINABLE alternate #-}
 alternate :: (Alternative m, Monad m) => ListT m a -> m a
 alternate (ListT m) = m >>= \case
