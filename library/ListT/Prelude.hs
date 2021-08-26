@@ -1,6 +1,7 @@
 module ListT.Prelude
 ( 
   module Exports,
+  bimapPair',
 )
 where
 
@@ -77,3 +78,9 @@ import Text.ParserCombinators.ReadPrec as Exports (ReadPrec, readPrec_to_P, read
 import Text.Printf as Exports (printf, hPrintf)
 import Text.Read as Exports (Read(..), readMaybe, readEither)
 import Unsafe.Coerce as Exports
+
+-- |
+-- A slightly stricter version of Data.Bifunctor.bimap.
+-- There's no benefit to producing lazy pairs here.
+bimapPair' :: (a -> b) -> (c -> d) -> (a, c) -> (b, d)
+bimapPair' f g = \(a,c) -> (f a, g c)

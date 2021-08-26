@@ -108,11 +108,6 @@ instance Monad m => Monoid (ListT m a) where
       return Nothing
   mappend = (<>)
 
--- A slightly stricter version of Data.Bifunctor.bimap.
--- There's no benefit to producing lazy pairs here.
-bimapPair' :: (a -> b) -> (c -> d) -> (a, c) -> (b, d)
-bimapPair' f g = \(a,c) -> (f a, g c)
-
 instance Functor m => Functor (ListT m) where
   fmap f = go
     where
