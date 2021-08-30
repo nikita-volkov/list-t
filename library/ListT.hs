@@ -212,20 +212,25 @@ instance MonadState e m => MonadState e (ListT m) where
 instance Monad m => MonadLogic (ListT m) where
   msplit (ListT m) = lift m
 
-  -- The below are copied from the defaults currently in
-  -- the logict master branch. The ones on Hackage have some
-  -- extra binds going on.
-  interleave m1 m2 = msplit m1 >>=
-                      maybe m2 (\(a, m1') -> pure a <|> interleave m2 m1')
+  interleave m1 m2 = ListT $ uncons m1 >>= \case
+    Nothing -> uncons m2
+    Just (a, m1') -> uncons $ cons a (interleave m2 m1')
 
-  m >>- f = msplit m >>= maybe empty
-    (\(a, m') -> interleave (f a) (m' >>- f))
+  m >>- f = ListT $ uncons m >>= \case
+    Nothing -> uncons empty
+    Just (a, m') -> uncons $ interleave (f a) (m' >>- f)
 
-  ifte t th el = msplit t >>= maybe el (\(a,m) -> th a <|> (m >>= th))
+  ifte t th el = ListT $ uncons t >>= \case
+    Nothing -> uncons el
+    Just (a,m) -> uncons $ th a <|> (m >>= th)
 
-  once m = msplit m >>= maybe empty (\(a, _) -> pure a)
+  once (ListT m) = ListT $ m >>= \case
+    Nothing -> uncons empty
+    Just (a, _) -> uncons (return a)
 
-  lnot m = msplit m >>= maybe (pure ()) (const empty)
+  lnot (ListT m) = ListT $ m >>= \case
+    Nothing -> uncons (return ())
+    Just _ -> uncons empty
 
 instance MonadZip m => MonadZip (ListT m) where
   mzipWith f = go
