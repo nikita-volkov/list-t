@@ -2,6 +2,7 @@ module ListT.Prelude
 ( 
   module Exports,
   bimapPair',
+  secondPair',
 )
 where
 
@@ -18,11 +19,12 @@ import Control.Monad.Fix as Exports hiding (fix)
 import Control.Monad.IO.Class as Exports
 import Control.Monad.Logic.Class as Exports
 import Control.Monad.Morph as Exports hiding (MonadTrans(..))
+import Control.Monad.Reader.Class as Exports
+import Control.Monad.State.Class as Exports
 import Control.Monad.ST as Exports
 import Control.Monad.Trans.Class as Exports
 import Control.Monad.Trans.Control as Exports hiding (embed, embed_)
 import Control.Monad.Trans.Maybe as Exports hiding (liftCatch, liftCallCC)
-import Control.Monad.Trans.Reader as Exports hiding (liftCatch, liftCallCC)
 import Control.Monad.Zip as Exports
 import Data.Bits as Exports
 import Data.Bool as Exports
@@ -84,3 +86,9 @@ import Unsafe.Coerce as Exports
 -- There's no benefit to producing lazy pairs here.
 bimapPair' :: (a -> b) -> (c -> d) -> (a, c) -> (b, d)
 bimapPair' f g = \(a,c) -> (f a, g c)
+
+-- |
+-- A slightly stricter version of Data.Bifunctor.second
+-- that doesn't produce gratuitous lazy pairs.
+secondPair' :: (b -> c) -> (a, b) -> (a, c)
+secondPair' f = \(a,b) -> (a, f b)
