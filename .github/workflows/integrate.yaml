@@ -20,8 +20,8 @@ jobs:
         name: Cache
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-ghc-7.10.3-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
-          restore-keys: ${{ runner.os }}-ghc-7.10.3-stack
+          key: ${{ runner.os }}-ghc-7-10-3-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
+          restore-keys: ${{ runner.os }}-ghc-7-10-3-stack
 
       - name: Install dependencies
         run: |
