@@ -36,10 +36,10 @@ jobs:
           stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
       - name: Collect pedantic warnings
-        run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-unused-do-bind -fno-warn-unused-top-binds"
 
       - name: Build
-        run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Werror -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Werror -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-unused-do-bind -fno-warn-unused-top-binds"
 
       - name: Test
         run: stack test
