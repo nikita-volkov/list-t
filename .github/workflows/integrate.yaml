@@ -4,10 +4,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc:
-          - "7.10.3"
-          - "9.0.1"
-    name: build-and-test / ${{matrix.ghc}}
+        resolver:
+          # GHC 7.10.3
+          - lts-6.35 
+          # GHC 9.0.1
+          - nightly-2021-09-12
+    name: build-and-test / ${{matrix.resolver}}
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -17,23 +19,25 @@ jobs:
           enable-stack: true
           stack-version: 2.7.1
           stack-no-global: true
-          ghc-version: ${{ matrix.ghc }}
+
+      - name: Init stack
+        run: stack init --resolver ${{ matrix.resolver }} --force
 
       - uses: actions/cache@v2.1.6
         name: Cache
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc }}-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
-          restore-keys: ${{ runner.os }}-ghc-${{ matrix.ghc }}-stack-
+          key: ${{ runner.os }}-stack-${{ matrix.resolver }}-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
+          restore-keys: ${{ runner.os }}-stack-${{ matrix.resolver }}
 
       - name: Install dependencies
-        run: stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
       - name: Collect pedantic warnings
-        run: stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
 
       - name: Build
-        run: stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Werror -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Werror -Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
 
       - name: Test
-        run: stack test --system-ghc
+        run: stack test
