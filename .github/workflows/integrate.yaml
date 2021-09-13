@@ -31,7 +31,9 @@ jobs:
           restore-keys: ${{ runner.os }}-stack-${{ matrix.resolver }}
 
       - name: Install dependencies
-        run: stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+        run: |
+          stack install happy
+          stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
       - name: Collect pedantic warnings
         run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
