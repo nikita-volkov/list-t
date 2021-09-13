@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          stack install happy
+          stack install happy-1.20.0
           stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
       - name: Collect pedantic warnings
