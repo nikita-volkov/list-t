@@ -21,7 +21,9 @@ jobs:
           stack-no-global: true
 
       - name: Init stack
-        run: stack init --resolver ${{ matrix.resolver.resolver }} --force
+        run: |
+          stack init --resolver ${{ matrix.resolver.resolver }} --force
+          echo "extra-deps: [\"logict-0.7.1.0\"]" >> stack.yaml
 
       - uses: actions/cache@v2.1.6
         name: Cache
