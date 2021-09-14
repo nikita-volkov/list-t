@@ -1,8 +1,15 @@
 on: [push]
 jobs:
 
-  build-on-ghc-8-0-2:
+  build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        resolver:
+          - ghc: "9.0.1"
+            resolver: nightly-2021-09-12
+          - ghc: "8.4.4"
+            resolver: lts-12.25
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -14,45 +21,14 @@ jobs:
           stack-no-global: true
 
       - name: Init stack
-        run: stack init --resolver lts-9.21 --force
+        run: stack init --resolver ${{ matrix.resolver.resolver }} --force
 
       - uses: actions/cache@v2.1.6
         name: Cache
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-ghc-8-0-2-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
-          restore-keys: ${{ runner.os }}-ghc-8-0-2-stack
-
-      - name: Install dependencies
-        run: stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
-
-      - name: Build
-        run: stack build --test --bench --no-run-tests --no-run-benchmarks
-
-      - name: Test
-        run: stack test
-
-  build-and-test-on-latest-ghc:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.3.4
-
-      - uses: haskell/actions/setup@v1.2.1
-        name: Setup
-        with:
-          enable-stack: true
-          stack-version: 2.7.1
-          stack-no-global: true
-
-      - name: Init stack
-        run: stack init --resolver nightly-2021-09-12 --force
-
-      - uses: actions/cache@v2.1.6
-        name: Cache
-        with:
-          path: ~/.stack
-          key: ${{ runner.os }}-ghc-latest-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
-          restore-keys: ${{ runner.os }}-ghc-latest-stack
+          key: ${{ runner.os }}-ghc-${{ matrix.resolver.ghc }}-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
+          restore-keys: ${{ runner.os }}-ghc-${{ matrix.resolver.ghc }}-stack-
 
       - name: Install dependencies
         run: stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
