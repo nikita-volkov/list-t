@@ -24,9 +24,7 @@ jobs:
           restore-keys: ${{ runner.os }}-ghc-8-0-2-stack
 
       - name: Install dependencies
-        run: |
-          stack install happy-1.20.0
-          stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
       - name: Build
         run: stack build --test --bench --no-run-tests --no-run-benchmarks
@@ -57,9 +55,7 @@ jobs:
           restore-keys: ${{ runner.os }}-ghc-latest-stack
 
       - name: Install dependencies
-        run: |
-          stack install happy-1.20.0
-          stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+        run: stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
       - name: Collect pedantic warnings
         run: stack build --test --bench --no-run-tests --no-run-benchmarks --ghc-options="-Wall -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-do-bind -Wno-unused-top-binds"
