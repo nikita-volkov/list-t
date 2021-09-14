@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 module ListT.Prelude
 ( 
   module Exports,
@@ -15,9 +14,7 @@ import Control.Foldl as Exports (Fold(..), FoldM(..))
 import Control.Monad as Exports hiding (mapM_, sequence_, forM_, msum, mapM, sequence, forM, fail)
 import Control.Monad.Base as Exports
 import Control.Monad.Error.Class as Exports
-#if MIN_VERSION_base(4,11,0)
 import Control.Monad.Fail as Exports
-#endif
 import Control.Monad.Fix as Exports hiding (fix)
 import Control.Monad.IO.Class as Exports
 import Control.Monad.Logic.Class as Exports

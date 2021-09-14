@@ -154,11 +154,9 @@ instance Monad m => Monad (ListT m) where
     mempty
 #endif
 
-#if MIN_VERSION_base(4,11,0)
 instance Monad m => MonadFail (ListT m) where
   fail _ =
     inline mempty
-#endif
 
 instance Monad m => MonadPlus (ListT m) where
   mzero = 

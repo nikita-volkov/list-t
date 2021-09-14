@@ -1,7 +1,7 @@
 on: [push]
 jobs:
 
-  build-on-ghc-7-10-3:
+  build-on-ghc-8-0-2:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -14,14 +14,14 @@ jobs:
           stack-no-global: true
 
       - name: Init stack
-        run: stack init --resolver lts-6.35 --force
+        run: stack init --resolver lts-9.21 --force
 
       - uses: actions/cache@v2.1.6
         name: Cache
         with:
           path: ~/.stack
-          key: ${{ runner.os }}-ghc-7-10-3-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
-          restore-keys: ${{ runner.os }}-ghc-7-10-3-stack
+          key: ${{ runner.os }}-ghc-8-0-2-stack-${{ hashFiles('stack.yaml', 'stack.yaml.lock') }}-${{ hashFiles('**.cabal') }}
+          restore-keys: ${{ runner.os }}-ghc-8-0-2-stack
 
       - name: Install dependencies
         run: |
