@@ -11,6 +11,13 @@ packages:
     hackage: HTF-0.14.0.7@sha256:7d79edaafc0dfcaaf3c7db2ae42db34d4c67c23fbb2dfbd9b7967e310fd18167,7157
   original:
     hackage: HTF-0.14.0.7
+- completed:
+    pantry-tree:
+      sha256: 771df0080ef76ef9cdeaf97f13bdccfe5c6080b869ea74cb93dda4d151c836c6
+      size: 504
+    hackage: logict-0.8.0.0@sha256:3d5d87a1d892a4732351c9a0b022d2d07bbb14e60582967c3c703c6ed69de88a,1800
+  original:
+    hackage: logict-0.8.0.0
 snapshots:
 - completed:
     sha256: 42b5030fc96fe064d61c662330df4d0369c0ab48648ca2a51705cf26b32550a0
