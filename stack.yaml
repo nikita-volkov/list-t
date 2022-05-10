@@ -1,0 +1,3 @@
+resolver: nightly-2022-05-05
+extra-deps:
+  - HTF-0.14.0.7
