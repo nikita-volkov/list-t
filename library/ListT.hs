@@ -121,8 +121,8 @@ instance Functor m => Functor (ListT m) where
         ListT . (fmap . fmap) (bimapPair' f go) . uncons
 
 instance (Monad m, Functor m) => Applicative (ListT m) where
-  pure =
-    return
+  pure a =
+    ListT $ return (Just (a, (ListT (return Nothing))))
   (<*>) =
     ap
 
@@ -133,7 +133,6 @@ instance (Monad m, Functor m) => Applicative (ListT m) where
   liftA2 f m1 m2 = do
     x1 <- m1
     fmap (f x1) m2
-  (*>) = (>>)
 
 instance (Monad m, Functor m) => Alternative (ListT m) where
   empty =
@@ -142,8 +141,7 @@ instance (Monad m, Functor m) => Alternative (ListT m) where
     inline mappend
 
 instance Monad m => Monad (ListT m) where
-  return a =
-    ListT $ return (Just (a, (ListT (return Nothing))))
+  return = pure
 
   -- We use a go function so GHC can inline k2
   -- if it likes.
