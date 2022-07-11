@@ -38,7 +38,7 @@ library
     monad-control >=0.3 && <2,
     mtl ==2.*,
     semigroups >=0.11 && <0.21,
-    transformers >=0.3 && <0.6,
+    transformers >=0.3 && <0.7,
     transformers-base ==0.4.*
 
 test-suite tests
