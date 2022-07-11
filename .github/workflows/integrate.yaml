@@ -6,8 +6,8 @@ jobs:
     strategy:
       matrix:
         resolver:
-          - ghc: "9.0.1"
-            resolver: nightly-2021-09-12
+          - ghc: "9.2.2"
+            resolver: nightly-2022-05-05
           - ghc: "8.4.4"
             resolver: lts-12.25
     steps:
