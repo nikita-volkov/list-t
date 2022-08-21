@@ -37,9 +37,10 @@ library
     mmorph ==1.*,
     monad-control >=0.3 && <2,
     mtl ==2.*,
-    semigroups >=0.11 && <0.21,
     transformers >=0.3 && <0.7,
     transformers-base ==0.4.*
+  if impl(ghc < 8.0)
+    build-depends: semigroups >=0.11 && <0.21
 
 test-suite tests
   import: language-settings
