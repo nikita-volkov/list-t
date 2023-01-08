@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          list-t
-version:       1.0.5.3
+version:       1.0.5.4
 synopsis:      ListT done right
 description:
   A correct implementation of the list monad-transformer.
