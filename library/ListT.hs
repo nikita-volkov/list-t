@@ -407,7 +407,7 @@ splitAt =
 -- |
 -- Prepend an element.
 cons :: Monad m => a -> ListT m a -> ListT m a
-cons h t =
+cons !h t =
   ListT $ return (Just (h, t))
 
 -- |
