@@ -340,14 +340,21 @@ alternateHoisting f = go
 -- |
 -- Execute, applying a strict left fold.
 {-# INLINEABLE fold #-}
-fold :: Monad m => (r -> a -> m r) -> r -> ListT m a -> m r
-fold s r =
-  uncons >=> maybe (return r) (\(!h, t) -> s r h >>= \r' -> fold s r' t)
+fold :: Monad m => (b -> a -> m b) -> b -> ListT m a -> m b
+fold step = go
+  where
+    go !acc (ListT run) =
+      run >>= \case
+        Just (element, next) -> do
+          acc' <- step acc element
+          go acc' next
+        Nothing ->
+          return acc
 
 -- |
 -- A version of 'fold', which allows early termination.
 {-# INLINEABLE foldMaybe #-}
-foldMaybe :: Monad m => (r -> a -> m (Maybe r)) -> r -> ListT m a -> m r
+foldMaybe :: Monad m => (b -> a -> m (Maybe b)) -> b -> ListT m a -> m b
 foldMaybe s r l =
   fmap (maybe r id) $
     runMaybeT $ do
@@ -356,7 +363,7 @@ foldMaybe s r l =
       lift $ foldMaybe s r' t
 
 -- |
--- Apply a left fold abstraction from the \"foldl\" package.
+-- Apply the left fold abstraction from the \"foldl\" package.
 applyFoldM :: Monad m => FoldM m i o -> ListT m i -> m o
 applyFoldM (FoldM step init extract) lt = do
   a <- init
