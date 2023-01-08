@@ -338,11 +338,11 @@ alternateHoisting f = go
         Just (a, as) -> pure a <|> go as
 
 -- |
--- Execute, applying a left fold.
+-- Execute, applying a strict left fold.
 {-# INLINEABLE fold #-}
 fold :: Monad m => (r -> a -> m r) -> r -> ListT m a -> m r
 fold s r =
-  uncons >=> maybe (return r) (\(h, t) -> s r h >>= \r' -> fold s r' t)
+  uncons >=> maybe (return r) (\(!h, t) -> s r h >>= \r' -> fold s r' t)
 
 -- |
 -- A version of 'fold', which allows early termination.
