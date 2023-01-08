@@ -368,7 +368,7 @@ applyFoldM (FoldM step init extract) lt = do
 {-# INLINEABLE toList #-}
 toList :: Monad m => ListT m a -> m [a]
 toList =
-  liftM ($ []) . fold (\f e -> return $ f . (e :)) id
+  fmap reverse . toReverseList
 
 -- |
 -- Execute, folding to a list in the reverse order.
@@ -376,7 +376,7 @@ toList =
 {-# INLINEABLE toReverseList #-}
 toReverseList :: Monad m => ListT m a -> m [a]
 toReverseList =
-  ListT.fold (\l -> return . (: l)) []
+  fold (\list element -> return (element : list)) []
 
 -- |
 -- Execute, traversing the stream with a side effect in the inner monad.
