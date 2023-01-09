@@ -177,7 +177,11 @@ instance MonadIO m => MonadIO (ListT m) where
 instance MFunctor ListT where
   hoist f = go
     where
-      go = ListT . f . (fmap . fmap) (bimapPair' id go) . uncons
+      go (ListT run) =
+        ListT . f $
+          run <&> \case
+            Just (elem, next) -> Just (elem, go next)
+            Nothing -> Nothing
 
 instance MMonad ListT where
   embed f (ListT m) =
