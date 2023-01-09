@@ -468,10 +468,14 @@ repeat =
 -- which traverses the stream with an action in the inner monad.
 {-# INLINEABLE traverse #-}
 traverse :: Monad m => (a -> m b) -> ListT m a -> ListT m b
-traverse f s =
-  lift (uncons s)
-    >>= mapM (\(h, t) -> lift (f h) >>= \h' -> cons h' (traverse f t))
-    >>= maybe mzero return
+traverse f =
+  go
+  where
+    go (ListT run) =
+      ListT $
+        run >>= \case
+          Nothing -> return Nothing
+          Just (a, next) -> f a <&> \b -> Just (b, go next)
 
 -- |
 -- A transformation,
