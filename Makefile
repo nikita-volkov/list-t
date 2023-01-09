@@ -8,7 +8,7 @@ docs:
 
 format:
 	path=list-t.cabal && cabal-fmt -c --indent 2 $$path || cabal-fmt -i $$path
-	ormolu --mode inplace -c $$(find . -name "*.hs" -path "./library/*" && find . -name "*.hs" -path "./tests/*")
+	ormolu --mode inplace -c $$(find . -name "*.hs" -path "./library/*" && find . -name "*.hs" -path "./htf-test/*")
 
 clean:
 	rm -rf dist
