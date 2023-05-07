@@ -38,7 +38,6 @@ module ListT
   )
 where
 
-import Control.Monad
 import ListT.Prelude hiding (drop, fold, head, null, repeat, splitAt, tail, take, toList, traverse, traverse_, uncons, yield)
 
 -- |
