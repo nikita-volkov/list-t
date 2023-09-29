@@ -67,7 +67,7 @@ library
   other-modules:   ListT.Prelude
   build-depends:
     , base               >=4.11 && <5
-    , foldl              >=1    && <2
+    , foldl              >=1.2  && <2
     , logict             >=0.7  && <0.9
     , mmorph             >=1    && <2
     , monad-control      >=0.3  && <2
