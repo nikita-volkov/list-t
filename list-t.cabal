@@ -66,14 +66,14 @@ library
   exposed-modules: ListT
   other-modules:   ListT.Prelude
   build-depends:
-    , base               >=4.11 && <5
-    , foldl              >=1.2  && <2
-    , logict             >=0.7  && <0.9
-    , mmorph             >=1    && <2
-    , monad-control      >=0.3  && <2
-    , mtl                >=2    && <3
-    , transformers       >=0.3  && <0.7
-    , transformers-base  ^>=0.4
+    , base >=4.11 && <5
+    , foldl >=1.2 && <2
+    , logict >=0.7 && <0.9
+    , mmorph >=1 && <2
+    , monad-control >=0.3 && <2
+    , mtl >=2 && <3
+    , transformers >=0.3 && <0.7
+    , transformers-base ^>=0.4
 
   if impl(ghc <8.0)
     build-depends: semigroups >=0.11 && <0.21
@@ -85,7 +85,7 @@ test-suite htf-test
   main-is:        Main.hs
   build-depends:
     , base-prelude
-    , HTF           ^>=0.15
+    , HTF ^>=0.15
     , list-t
     , mmorph
-    , mtl-prelude   <3
+    , mtl-prelude <3
