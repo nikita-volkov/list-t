@@ -135,7 +135,7 @@ test_slice =
   assertEqual ["abc", "def", "gh"] =<< do
     toList $ L.slice 3 $ L.fromFoldable ("abcdefgh" :: [Char])
 
-toList :: Monad m => L.ListT m a -> m [a]
+toList :: (Monad m) => L.ListT m a -> m [a]
 toList = L.toList
 
 streamsEqual :: (Applicative m, Monad m, Eq a) => L.ListT m a -> L.ListT m a -> m Bool

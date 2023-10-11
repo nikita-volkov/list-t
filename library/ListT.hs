@@ -52,27 +52,27 @@ newtype ListT m a
   = ListT (m (Maybe (a, ListT m a)))
   deriving (Foldable, Traversable, Generic)
 
-deriving instance Show (m (Maybe (a, ListT m a))) => Show (ListT m a)
+deriving instance (Show (m (Maybe (a, ListT m a)))) => Show (ListT m a)
 
-deriving instance Read (m (Maybe (a, ListT m a))) => Read (ListT m a)
+deriving instance (Read (m (Maybe (a, ListT m a)))) => Read (ListT m a)
 
-deriving instance Eq (m (Maybe (a, ListT m a))) => Eq (ListT m a)
+deriving instance (Eq (m (Maybe (a, ListT m a)))) => Eq (ListT m a)
 
-deriving instance Ord (m (Maybe (a, ListT m a))) => Ord (ListT m a)
+deriving instance (Ord (m (Maybe (a, ListT m a)))) => Ord (ListT m a)
 
 deriving instance (Typeable m, Typeable a, Data (m (Maybe (a, ListT m a)))) => Data (ListT m a)
 
-instance Eq1 m => Eq1 (ListT m) where
+instance (Eq1 m) => Eq1 (ListT m) where
   liftEq eq = go
     where
       go (ListT m) (ListT n) = liftEq (liftEq (\(a, as) (b, bs) -> eq a b && go as bs)) m n
 
-instance Ord1 m => Ord1 (ListT m) where
+instance (Ord1 m) => Ord1 (ListT m) where
   liftCompare cmp = go
     where
       go (ListT m) (ListT n) = liftCompare (liftCompare (\(a, as) (b, bs) -> cmp a b <> go as bs)) m n
 
-instance Show1 m => Show1 (ListT m) where
+instance (Show1 m) => Show1 (ListT m) where
   -- I wish I were joking.
   liftShowsPrec sp (sl :: [a] -> ShowS) = mark
     where
@@ -97,7 +97,7 @@ instance Show1 m => Show1 (ListT m) where
       jack :: Int -> (a, ListT m a) -> ShowS
       jack = liftShowsPrec2 sp sl mark juan
 
-instance Monad m => Semigroup (ListT m a) where
+instance (Monad m) => Semigroup (ListT m a) where
   (<>) (ListT m1) (ListT m2) =
     ListT $
       m1
@@ -107,13 +107,13 @@ instance Monad m => Semigroup (ListT m a) where
           Just (h1, s1') ->
             return (Just (h1, ((<>) s1' (ListT m2))))
 
-instance Monad m => Monoid (ListT m a) where
+instance (Monad m) => Monoid (ListT m a) where
   mempty =
     ListT $
       return Nothing
   mappend = (<>)
 
-instance Functor m => Functor (ListT m) where
+instance (Functor m) => Functor (ListT m) where
   fmap f = go
     where
       go =
@@ -139,7 +139,7 @@ instance (Monad m, Functor m) => Alternative (ListT m) where
   (<|>) =
     inline mappend
 
-instance Monad m => Monad (ListT m) where
+instance (Monad m) => Monad (ListT m) where
   return = pure
 
   -- We use a go function so GHC can inline k2
@@ -155,11 +155,11 @@ instance Monad m => Monad (ListT m) where
               Just (h1, t1) ->
                 uncons $ k2 h1 <> go t1
 
-instance Monad m => MonadFail (ListT m) where
+instance (Monad m) => MonadFail (ListT m) where
   fail _ =
     inline mempty
 
-instance Monad m => MonadPlus (ListT m) where
+instance (Monad m) => MonadPlus (ListT m) where
   mzero =
     inline mempty
   mplus =
@@ -169,7 +169,7 @@ instance MonadTrans ListT where
   lift =
     ListT . fmap (\a -> Just (a, mempty))
 
-instance MonadIO m => MonadIO (ListT m) where
+instance (MonadIO m) => MonadIO (ListT m) where
   liftIO =
     lift . liftIO
 
@@ -188,11 +188,11 @@ instance MMonad ListT where
       Nothing -> mzero
       Just (h, t) -> ListT $ return $ Just $ (h, embed f t)
 
-instance MonadBase b m => MonadBase b (ListT m) where
+instance (MonadBase b m) => MonadBase b (ListT m) where
   liftBase =
     lift . liftBase
 
-instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
+instance (MonadBaseControl b m) => MonadBaseControl b (ListT m) where
   type
     StM (ListT m) a =
       StM m (Maybe (a, ListT m a))
@@ -205,23 +205,23 @@ instance MonadBaseControl b m => MonadBaseControl b (ListT m) where
       Nothing -> mzero
       Just (h, t) -> cons h t
 
-instance MonadError e m => MonadError e (ListT m) where
+instance (MonadError e m) => MonadError e (ListT m) where
   throwError = ListT . throwError
   catchError m handler = ListT $ catchError (uncons m) $ uncons . handler
 
-instance MonadReader e m => MonadReader e (ListT m) where
+instance (MonadReader e m) => MonadReader e (ListT m) where
   ask = lift ask
   reader = lift . reader
   local r = go
     where
       go (ListT m) = ListT $ local r (fmap (fmap (secondPair' go)) m)
 
-instance MonadState e m => MonadState e (ListT m) where
+instance (MonadState e m) => MonadState e (ListT m) where
   get = lift get
   put = lift . put
   state = lift . state
 
-instance Monad m => MonadLogic (ListT m) where
+instance (Monad m) => MonadLogic (ListT m) where
   msplit (ListT m) = lift m
 
   interleave m1 m2 =
@@ -254,7 +254,7 @@ instance Monad m => MonadLogic (ListT m) where
         Nothing -> uncons (return ())
         Just _ -> uncons empty
 
-instance MonadZip m => MonadZip (ListT m) where
+instance (MonadZip m) => MonadZip (ListT m) where
   mzipWith f = go
     where
       go (ListT m1) (ListT m2) =
@@ -298,21 +298,21 @@ uncons (ListT m) =
 -- |
 -- Execute, getting the head. Returns nothing if it's empty.
 {-# INLINEABLE head #-}
-head :: Monad m => ListT m a -> m (Maybe a)
+head :: (Monad m) => ListT m a -> m (Maybe a)
 head =
   fmap (fmap fst) . uncons
 
 -- |
 -- Execute, getting the tail. Returns nothing if it's empty.
 {-# INLINEABLE tail #-}
-tail :: Monad m => ListT m a -> m (Maybe (ListT m a))
+tail :: (Monad m) => ListT m a -> m (Maybe (ListT m a))
 tail =
   fmap (fmap snd) . uncons
 
 -- |
 -- Execute, checking whether it's empty.
 {-# INLINEABLE null #-}
-null :: Monad m => ListT m a -> m Bool
+null :: (Monad m) => ListT m a -> m Bool
 null =
   fmap (maybe True (const False)) . uncons
 
@@ -343,7 +343,7 @@ alternateHoisting f = go
 -- |
 -- Execute, applying a strict left fold.
 {-# INLINEABLE fold #-}
-fold :: Monad m => (b -> a -> m b) -> b -> ListT m a -> m b
+fold :: (Monad m) => (b -> a -> m b) -> b -> ListT m a -> m b
 fold step = go
   where
     go !acc (ListT run) =
@@ -357,7 +357,7 @@ fold step = go
 -- |
 -- A version of 'fold', which allows early termination.
 {-# INLINEABLE foldMaybe #-}
-foldMaybe :: Monad m => (b -> a -> m (Maybe b)) -> b -> ListT m a -> m b
+foldMaybe :: (Monad m) => (b -> a -> m (Maybe b)) -> b -> ListT m a -> m b
 foldMaybe s r l =
   fmap (maybe r id) $
     runMaybeT $ do
@@ -367,7 +367,7 @@ foldMaybe s r l =
 
 -- |
 -- Apply the left fold abstraction from the \"foldl\" package.
-applyFoldM :: Monad m => FoldM m i o -> ListT m i -> m o
+applyFoldM :: (Monad m) => FoldM m i o -> ListT m i -> m o
 applyFoldM (FoldM step init extract) lt = do
   a <- init
   b <- fold step a lt
@@ -376,7 +376,7 @@ applyFoldM (FoldM step init extract) lt = do
 -- |
 -- Execute, folding to a list.
 {-# INLINEABLE toList #-}
-toList :: Monad m => ListT m a -> m [a]
+toList :: (Monad m) => ListT m a -> m [a]
 toList =
   fmap reverse . toReverseList
 
@@ -384,21 +384,21 @@ toList =
 -- Execute, folding to a list in the reverse order.
 -- Performs more efficiently than 'toList'.
 {-# INLINEABLE toReverseList #-}
-toReverseList :: Monad m => ListT m a -> m [a]
+toReverseList :: (Monad m) => ListT m a -> m [a]
 toReverseList =
   fold (\list element -> return (element : list)) []
 
 -- |
 -- Execute, traversing the stream with a side effect in the inner monad.
 {-# INLINEABLE traverse_ #-}
-traverse_ :: Monad m => (a -> m ()) -> ListT m a -> m ()
+traverse_ :: (Monad m) => (a -> m ()) -> ListT m a -> m ()
 traverse_ f =
   fold (const f) ()
 
 -- |
 -- Execute, consuming a list of the specified length and returning the remainder stream.
 {-# INLINEABLE splitAt #-}
-splitAt :: Monad m => Int -> ListT m a -> m ([a], ListT m a)
+splitAt :: (Monad m) => Int -> ListT m a -> m ([a], ListT m a)
 splitAt =
   \case
     n | n > 0 -> \l ->
@@ -416,7 +416,7 @@ splitAt =
 
 -- |
 -- Prepend an element.
-cons :: Monad m => a -> ListT m a -> ListT m a
+cons :: (Monad m) => a -> ListT m a -> ListT m a
 cons h t =
   ListT $ return (Just (h, t))
 
@@ -436,7 +436,7 @@ fromMVar v =
 -- |
 -- Construct by unfolding a pure data structure.
 {-# INLINEABLE unfold #-}
-unfold :: Monad m => (b -> Maybe (a, b)) -> b -> ListT m a
+unfold :: (Monad m) => (b -> Maybe (a, b)) -> b -> ListT m a
 unfold f s =
   maybe mzero (\(h, t) -> cons h (unfold f t)) (f s)
 
@@ -446,7 +446,7 @@ unfold f s =
 -- This is the most memory-efficient way to construct ListT where
 -- the length depends on the inner monad.
 {-# INLINEABLE unfoldM #-}
-unfoldM :: Monad m => (b -> m (Maybe (a, b))) -> b -> ListT m a
+unfoldM :: (Monad m) => (b -> m (Maybe (a, b))) -> b -> ListT m a
 unfoldM f = go
   where
     go s =
@@ -458,7 +458,7 @@ unfoldM f = go
 -- |
 -- Produce an infinite stream.
 {-# INLINEABLE repeat #-}
-repeat :: Monad m => a -> ListT m a
+repeat :: (Monad m) => a -> ListT m a
 repeat =
   fix . cons
 
@@ -470,7 +470,7 @@ repeat =
 -- A transformation,
 -- which traverses the stream with an action in the inner monad.
 {-# INLINEABLE traverse #-}
-traverse :: Monad m => (a -> m b) -> ListT m a -> ListT m b
+traverse :: (Monad m) => (a -> m b) -> ListT m a -> ListT m b
 traverse f =
   go
   where
@@ -484,7 +484,7 @@ traverse f =
 -- A transformation,
 -- reproducing the behaviour of @Data.List.'Data.List.take'@.
 {-# INLINEABLE take #-}
-take :: Monad m => Int -> ListT m a -> ListT m a
+take :: (Monad m) => Int -> ListT m a -> ListT m a
 take =
   \case
     n | n > 0 -> \t ->
@@ -499,7 +499,7 @@ take =
 -- A transformation,
 -- reproducing the behaviour of @Data.List.'Data.List.drop'@.
 {-# INLINEABLE drop #-}
-drop :: Monad m => Int -> ListT m a -> ListT m a
+drop :: (Monad m) => Int -> ListT m a -> ListT m a
 drop =
   \case
     n
@@ -512,7 +512,7 @@ drop =
 -- A transformation,
 -- which slices a list into chunks of the specified length.
 {-# INLINEABLE slice #-}
-slice :: Monad m => Int -> ListT m a -> ListT m [a]
+slice :: (Monad m) => Int -> ListT m a -> ListT m [a]
 slice n l =
   do
     (h, t) <- lift $ splitAt n l
