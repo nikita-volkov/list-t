@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -F -pgmF htfpp #-}
+{-# OPTIONS_GHC -F -pgmF htfpp -Wno-redundant-constraints #-}
 
 import BasePrelude hiding (toList)
 import Control.Monad.Morph
@@ -6,16 +6,19 @@ import qualified ListT as L
 import MTLPrelude
 import Test.Framework
 
-main = htfMain $ htf_thisModulesTests
+main :: IO ()
+main = htfMain htf_thisModulesTests
 
 -- * MMonad
 
 -- embed lift = id
+prop_mmonadLaw1 :: [Int] -> Bool
 prop_mmonadLaw1 (l :: [Int]) =
   let s = L.fromFoldable l
    in runIdentity $ streamsEqual s (embed lift s)
 
 -- embed f (lift m) = f m
+prop_mmonadLaw2 :: [Int] -> Bool
 prop_mmonadLaw2 l =
   let s = (L.fromFoldable :: [Int] -> L.ListT Identity Int) l
       f = MaybeT . fmap Just
@@ -25,11 +28,13 @@ prop_mmonadLaw2 l =
 
 -- * Applicative
 
+prop_applicativeIdentityLaw :: [Int] -> Bool
 prop_applicativeIdentityLaw (l :: [Int]) =
   runIdentity $ streamsEqual (pure id <*> s) s
   where
     s = L.fromFoldable l
 
+prop_applicativeBehavesLikeList :: [Int] -> Bool
 prop_applicativeBehavesLikeList =
   \(ns :: [Int]) ->
     let a = fs <*> ns
@@ -40,17 +45,20 @@ prop_applicativeBehavesLikeList =
 
 -- * Monad
 
+test_monadLaw1 :: IO ()
 test_monadLaw1 =
   assertBool =<< streamsEqual (return a >>= k) (k a)
   where
     a = 2
     k a = return $ chr a
 
+test_monadLaw2 :: IO ()
 test_monadLaw2 =
   assertBool =<< streamsEqual (m >>= return) m
   where
     m = L.fromFoldable ['a' .. 'z']
 
+test_monadLaw3 :: IO ()
 test_monadLaw3 =
   assertBool =<< streamsEqual (m >>= (\x -> k x >>= h)) ((m >>= k) >>= h)
   where
@@ -58,6 +66,7 @@ test_monadLaw3 =
     k a = return $ ord a
     h a = return $ a + 1
 
+test_monadLaw4 :: IO ()
 test_monadLaw4 =
   assertBool =<< streamsEqual (fmap f xs) (xs >>= return . f)
   where
@@ -66,18 +75,21 @@ test_monadLaw4 =
 
 -- * Monoid
 
+test_mappend :: IO ()
 test_mappend =
   assertBool
     =<< streamsEqual
       (L.fromFoldable [0 .. 7])
       (L.fromFoldable [0 .. 3] <> L.fromFoldable [4 .. 7])
 
+test_mappendAndTake :: IO ()
 test_mappendAndTake =
   assertBool
     =<< streamsEqual
       (L.fromFoldable [0 .. 5])
       (L.take 6 $ L.fromFoldable [0 .. 3] <> L.fromFoldable [4 .. 7])
 
+test_mappendDoesntCauseTraversal :: IO ()
 test_mappendDoesntCauseTraversal =
   do
     ref <- newIORef 0
@@ -93,10 +105,12 @@ test_mappendDoesntCauseTraversal =
 
 -- * Other
 
+test_repeat :: IO ()
 test_repeat =
   assertEqual [2, 2, 2] =<< do
     toList $ L.take 3 $ L.repeat (2 :: Int)
 
+test_traverseDoesntCauseTraversal :: IO ()
 test_traverseDoesntCauseTraversal =
   do
     ref <- newIORef 0
@@ -114,6 +128,7 @@ test_traverseDoesntCauseTraversal =
     stream3 =
       L.take 3 stream2
 
+test_takeDoesntCauseTraversal :: IO ()
 test_takeDoesntCauseTraversal =
   do
     ref <- newIORef 0
@@ -127,10 +142,12 @@ test_takeDoesntCauseTraversal =
         liftIO $ modifyIORef ref (+ 1)
         return x
 
+test_drop :: IO ()
 test_drop =
   assertEqual [3, 4] =<< do
     toList $ L.drop 2 $ L.fromFoldable [1 .. 4]
 
+test_slice :: IO ()
 test_slice =
   assertEqual ["abc", "def", "gh"] =<< do
     toList $ L.slice 3 $ L.fromFoldable ("abcdefgh" :: [Char])
